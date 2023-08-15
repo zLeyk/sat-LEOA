@@ -45,8 +45,8 @@ public class EdgeController {
 
         //测试-建立Map存储多个IP和端口号
         ArrayList<Info> iplist = new ArrayList<Info>();
-        Info a = new Info("192.168.10.23", "8899");
-        Info b = new Info("192.168.10.23", "8897");
+        Info tcc = new Info("192.168.10.23", "8899");
+        Info leoB = new Info("192.168.10.23", "8898");
         //iplist.add(a); 在测试中，打开此对应程序就取消注释
         //iplist.add(b);
         //System.out.println(iplist.get(0).getIp()+":"+iplist.get(0).getPort());
@@ -55,9 +55,15 @@ public class EdgeController {
             //遍历，每有一个主机节点就发起一个消息。*注意要排除自身的ip和端口
 
             System.out.println(iplist.get(i).getIp()+":"+iplist.get(i).getPort());
-            Socket client = new Socket(iplist.get(i).getIp(), Integer.parseInt(iplist.get(i).getPort()));
-            //需要加一个判断，不同的消息类型调用不同的任务
-            new Thread(new SendTask(client)).start();
+
+            try{
+                Socket client = new Socket(iplist.get(i).getIp(), Integer.parseInt(iplist.get(i).getPort()));
+                client.sendUrgentData(0xFF);
+                //需要加一个判断，不同的消息类型调用不同的任务
+                new Thread(new SendTask(client)).start();
+            } catch (Exception e) {
+                System.out.println(iplist.get(i).getIp()+":"+iplist.get(i).getPort()+"无法连接！");
+            }
         }
 
 
