@@ -44,4 +44,6 @@ package com.sat.satquery.entity;
     private String MainKey;
 
 
+        @TableField("CK")
+    private String ck;
 }
