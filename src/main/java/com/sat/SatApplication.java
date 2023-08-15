@@ -1,5 +1,6 @@
 package com.sat;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,7 +13,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 @SpringBootApplication
-@EnableAutoConfiguration
+@MapperScan("com.sat.satquery.mapper")
+@MapperScan("com.sat.dao") // 添加包扫描后解决报错问题
 public class SatApplication {
     String IP = "192.168.10.23";
     public static void main(String[] args) throws IOException {
