@@ -1,0 +1,22 @@
+.el-header{
+    background-color: black;
+    color: black;
+    text-align: center;
+    line-height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.bt{
+    justify-content: right;
+}
+
+.main_page {
+    background-image: url("../pic/sat.jpg");
+    background-size: cover;
+    background-position: center;
+}
+.el-form-item lable{
+    color: red;
+    font-weight: bold;
+}

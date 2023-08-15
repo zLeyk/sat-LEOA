@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <!-- 页面meta -->
+
+  <meta charset="utf-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+
+  <!-- 引入样式 -->
+
+
+  <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../plugins/elementui/index.css">
+  <link rel="stylesheet" href="../css/sccstyle.css">
+  <link rel="stylesheet" href="../plugins/layui/css/layui.css">
+</head>
+
+<body class="hold-transition">
+
+<el-container id="app">
+
+  <el-header>
+    <div>
+      <p style="font-size: 3em;color: white">卫星控制中心</p>
+    </div>
+  </el-header>
+  <el-container>
+    <el-aside>
+      <el-menu
+              default-active="2"
+              class="el-menu-vertical-demo"
+              background-color="#545c64"
+              text-color="#fff"
+              active-text-color="#ffd04b"
+              style="height: 100vh"
+      >
+        <el-menu-item index="3" @click="showFormMethod()">
+          <i class="el-icon-setting"></i>
+          <span slot="title">预置信息管理</span>
+        </el-menu-item>
+        <el-menu-item index="4" @click="showTableMethod()">
+          <i class="el-icon-setting"></i>
+          <span slot="title">认证信息管理</span>
+        </el-menu-item>
+      </el-menu>
+    </el-aside>
+    <el-main class="main_page">
+
+
+<!--      预置信息界面-->
+      <el-container class="bt">
+        <div>
+      <el-button type="info" v-show="showForm">发起地面认证</el-button>
+        </div>
+      </el-container>
+      <el-form ref="" :model="formData" label-width="130px" v-show="showForm">
+
+        <el-form-item label="密钥身份信息">
+          <el-input type="textarea" v-model="formData.msx" style="font-size: 16px"></el-input>
+        </el-form-item>
+        <el-form-item label="默认加密密钥">
+          <el-input type="textarea" v-model="formData.mjm" style="font-size: 16px"></el-input>
+        </el-form-item>
+        <el-form-item label="默认认证密钥">
+          <el-input type="textarea" v-model="formData.mrm" style="font-size: 16px"></el-input>
+        </el-form-item>
+        <el-form-item label="工作加密密钥">
+          <el-input type="textarea" v-model="formData.gjm" style="font-size: 16px"></el-input>
+        </el-form-item>
+        <el-form-item label="工作认证密钥">
+          <el-input type="textarea" v-model="formData.grm" style="font-size: 16px"></el-input>
+        </el-form-item>
+      </el-form>
+
+
+<!--      认证信息界面-->
+      <el-container class="bt">
+        <div>
+          <el-button type="info" v-show="showTable">发起星间认证</el-button>
+        </div>
+      </el-container>
+<!--      <el-table size="small" current-row-key="id" :data="tableData" stripe highlight-current-row v-show="showTable">-->
+<!--        <el-table-column prop="wsx" label="卫星身份信息" align="center"></el-table-column>-->
+<!--        <el-table-column prop="wgf" label="卫星广播身份" align="center"></el-table-column>-->
+<!--        <el-table-column prop="wlf" label="卫星临时身份" align="center"></el-table-column>-->
+<!--        <el-table-column prop="yxd" label="预期响应数据" align="center"></el-table-column>-->
+<!--        <el-table-column prop="hm" label="会话密钥" align="center"></el-table-column>-->
+<!--        <el-table-column prop="rl" label="认证令牌" align="center"></el-table-column>-->
+
+<!--      </el-table>-->
+
+      <table class="layui-table" v-show="showTable">
+        <colgroup>
+          <col width="150">
+          <col width="200">
+          <col>
+        </colgroup>
+        <thead>
+        <tr>
+          <th>卫星身份信息</th>
+          <th>卫星广播身份</th>
+          <th>卫星临时身份</th>
+          <th>预期响应数据</th>
+          <th>会话密钥</th>
+          <th>认证令牌</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="item in tableData">
+          <td>{{ item.wsx }}</td>
+          <td>{{ item.wgf }}</td>
+          <td>{{ item.wlf }}</td>
+          <td>{{ item.yxd }}</td>
+          <td>{{ item.hm }}</td>
+          <td>{{ item.rl }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </el-main>
+  </el-container>
+</el-container>
+
+</div>
+
+</body>
+
+<!-- 引入组件库 -->
+
+<script src="../js/vue.js"></script>
+
+<script src="../plugins/elementui/index.js"></script>
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+
+<script src="../js/axios-0.18.0.js"></script>
+
+
+
+<script>
+  var vue = new Vue({
+    el: '#app',
+    data:{
+      showForm:false,
+      showTable:false,
+      tableData: [{wsx:'0001',wgf:'0002',wlf:'000111',yxd:'111111',hm:'110111',rl:'100000'},
+        {wsx:'0002',wgf:'0003',wlf:'010111',yxd:'111101',hm:'110011',rl:'100100'}
+      ],//当前页要展示的列表数据
+      dialogFormVisible: false,//添加表单是否可见
+      dialogFormVisible4Edit:false,//编辑表单是否可见
+      formData: {
+        msx:'110100001',
+        mjm:'110100011',
+        mrm:'110100001',
+        gjm:'110110001',
+        grm:'100010101',
+      },//表单数据
+    },
+
+    //钩子函数，VUE对象初始化完成后自动执行
+    created() {
+      //调用查询全部数据的操作
+      //  this.getAll();
+    },
+
+    methods: {
+
+      getAll() {
+        axios.get("/edges/"+this.pagination.currentPage+"/"+this.pagination.pageSize).then((res)=>{
+          this.pagination.pageSize =res.data.data.size;
+          this.pagination.currentPage=res.data.data.current;
+          this.pagination.total=res.data.data.total;
+          this.dataList=res.data.data.records;
+        });
+      },
+      // 添加边
+      addEdge(){
+        this.dialogFormVisible = true
+      },
+      //切换页码
+      showFormMethod() {
+        if (this.showTable ===true) {
+          this.showTable = false;
+        }
+        this.showForm = true;
+        },
+      showTableMethod() {
+        if (this.showForm ===true) {
+          this.showForm = false;
+        }
+        this.showTable = true;
+      },
+
+      //重置表单
+      resetForm() {
+        this.formData = {};
+      },
+      fun(){
+        this.ifShow = false
+        this.ifShow2 = false
+        axios.get("/edges/"+this.u+"/"+this.v+"/"+1).then((res)=>{
+          if(res.data.flag === false){
+            this.ifShow2 = true
+          }else{
+            this.ifShow = true
+            this.ans = res.data.ans;
+            this.pathList = res.data.data
+          }
+        });
+      },
+      //添加
+      handleAdd () {
+        axios.post("/edges",this.formData).then((res)=>{
+          if(res.data.flag) {
+            this.dialogFormVisible = false;
+            this.$message.success("添加成功")
+            this.handleCreate()
+          }else{
+            this.$message.error("存在此边,添加失败")
+          }
+        }).finally(()=>{
+          this.getAll();
+        });
+      },
+
+      //取消
+      cancel(){
+        this.dialogFormVisible = false;
+        this.dialogFormVisible4Edit = false;
+      },
+
+      // 删除
+      handleDelete(row) {
+
+        this.$confirm("此操作将删除信息,是否继续？","提示",{type:"info"}).then(()=>{
+          axios.delete("/edges/"+row.id).then((res)=>{
+            if(res.data.flag) {
+              this.$message.success("删除成功")
+            }else{
+              this.$message.error("数据同步失败，自动刷新");
+            }
+          }).finally(()=>{
+            this.getAll();
+          })
+        }).catch(()=>{
+          this.$message.info("取消操作")
+        })
+      },
+    }
+  })
+
+</script>
+
+</html>
