@@ -14,7 +14,6 @@ import java.net.SocketTimeoutException;
 
 @SpringBootApplication
 @MapperScan("com.sat.satquery.mapper")
-@MapperScan("com.sat.hostinfo.mapper")
 @MapperScan("com.sat.dao") // 添加包扫描后解决报错问题
 public class SatApplication {
     String IP = "192.168.10.23";

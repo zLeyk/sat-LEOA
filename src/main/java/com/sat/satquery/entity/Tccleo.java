@@ -13,12 +13,12 @@ package com.sat.satquery.entity;
     * </p>
 *
 * @author Archie
-* @since 2023-08-14
+* @since 2023-08-15
 */
     @Data
         @EqualsAndHashCode(callSuper = false)
     @Accessors(chain = true)
-    public class LeoLeoAuthentication implements Serializable {
+    public class Tccleo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,17 +28,14 @@ package com.sat.satquery.entity;
         @TableField("SSID")
     private String ssid;
 
-        @TableField("TID")
-    private String tid;
-
-        @TableField("Xres")
-    private String Xres;
+            /**
+            * 0 表示未认证 1表示认证
+            */
+        @TableField("ST")
+    private Integer st;
 
         @TableField("CK")
     private String ck;
-
-        @TableField("Token")
-    private String Token;
 
 
 }

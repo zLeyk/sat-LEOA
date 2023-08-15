@@ -13,12 +13,12 @@ package com.sat.satquery.entity;
     * </p>
 *
 * @author Archie
-* @since 2023-08-14
+* @since 2023-08-15
 */
     @Data
         @EqualsAndHashCode(callSuper = false)
     @Accessors(chain = true)
-    public class PreLeo implements Serializable {
+    public class Preleo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,13 +26,13 @@ package com.sat.satquery.entity;
     private Integer IDsat;
 
         @TableField("SSID")
-    private String ssid;
+    private Integer ssid;
 
-        @TableField("DKenc")
-    private String DKenc;
+        @TableField("Dkenc")
+    private String Dkenc;
 
-        @TableField("DKauth")
-    private String DKauth;
+        @TableField("Dkauth")
+    private String Dkauth;
 
         @TableField("WKenc")
     private String WKenc;
@@ -42,9 +42,6 @@ package com.sat.satquery.entity;
 
         @TableField("MainKey")
     private String MainKey;
-
-        @TableField("AuthKey")
-    private String AuthKey;
 
 
 }

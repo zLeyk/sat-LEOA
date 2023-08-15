@@ -1,6 +1,6 @@
 package com.sat.satquery.service;
 
-import com.sat.satquery.entity.PreLeo;
+import com.sat.satquery.entity.Preleo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * </p>
  *
  * @author Archie
- * @since 2023-08-14
+ * @since 2023-08-15
  */
-public interface IPreLeoService extends IService<PreLeo> {
+public interface IPreleoService extends IService<Preleo> {
 
 }

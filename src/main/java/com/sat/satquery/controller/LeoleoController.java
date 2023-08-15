@@ -1,8 +1,8 @@
 package com.sat.satquery.controller;
 
 
-import com.sat.satquery.entity.Pretcc;
-import com.sat.satquery.service.IPretccService;
+import com.sat.satquery.entity.Leoleo;
+import com.sat.satquery.service.ILeoleoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -19,15 +19,15 @@ import java.util.List;
  * @since 2023-08-15
  */
 @RestController
-@RequestMapping("/satquery/pretcc")
-public class PretccController {
+@RequestMapping("/satquery/leoleo")
+public class LeoleoController {
 
     @Autowired
-    IPretccService iPretccService;
+    ILeoleoService iLeoleoService;
 
-    @RequestMapping("/getAllPreTccInfo")
-    public List<Pretcc> getAllPreTccInfo() {
-        return iPretccService.list();
+    @RequestMapping("/getAllLeoLeoInfo")
+    public List<Leoleo> getAllLeoLeoInfo() {
+        return iLeoleoService.list();
     }
 
 }

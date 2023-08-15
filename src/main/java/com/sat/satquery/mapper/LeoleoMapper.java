@@ -1,6 +1,6 @@
 package com.sat.satquery.mapper;
 
-import com.sat.satquery.entity.Preleo;
+import com.sat.satquery.entity.Leoleo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author Archie
  * @since 2023-08-15
  */
-public interface PreleoMapper extends BaseMapper<Preleo> {
+public interface LeoleoMapper extends BaseMapper<Leoleo> {
 
 }

@@ -1,6 +1,6 @@
 package com.sat.satquery.service;
 
-import com.sat.satquery.entity.Pretcc;
+import com.sat.satquery.entity.Tccleo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Archie
  * @since 2023-08-15
  */
-public interface IPretccService extends IService<Pretcc> {
+public interface ITccleoService extends IService<Tccleo> {
 
 }

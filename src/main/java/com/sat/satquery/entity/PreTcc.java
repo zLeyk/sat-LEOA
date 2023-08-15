@@ -13,26 +13,26 @@ package com.sat.satquery.entity;
     * </p>
 *
 * @author Archie
-* @since 2023-08-14
+* @since 2023-08-15
 */
     @Data
         @EqualsAndHashCode(callSuper = false)
     @Accessors(chain = true)
-    public class PreTcc implements Serializable {
+    public class Pretcc implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
             @TableId("ID")
     private Integer id;
 
-        @TableField("DKenc")
-    private String DKenc;
-
         @TableField("DKauth")
     private String DKauth;
 
-        @TableField("WKenc")
-    private String WKenc;
+        @TableField("DKenc")
+    private String DKenc;
+
+        @TableField("Wkenc")
+    private String Wkenc;
 
         @TableField("K")
     private String k;

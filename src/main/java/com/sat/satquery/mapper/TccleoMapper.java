@@ -1,6 +1,6 @@
-package com.sat.hostinfo.mapper;
+package com.sat.satquery.mapper;
 
-import com.sat.hostinfo.entity.Info;
+import com.sat.satquery.entity.Tccleo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author Archie
  * @since 2023-08-15
  */
-public interface InfoMapper extends BaseMapper<Info> {
+public interface TccleoMapper extends BaseMapper<Tccleo> {
 
 }

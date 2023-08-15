@@ -1,8 +1,8 @@
 package com.sat.satquery.service.impl;
 
-import com.sat.satquery.entity.Pretcc;
-import com.sat.satquery.mapper.PretccMapper;
-import com.sat.satquery.service.IPretccService;
+import com.sat.satquery.entity.Leoleo;
+import com.sat.satquery.mapper.LeoleoMapper;
+import com.sat.satquery.service.ILeoleoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,6 @@ import org.springframework.stereotype.Service;
  * @since 2023-08-15
  */
 @Service
-public class PretccServiceImpl extends ServiceImpl<PretccMapper, Pretcc> implements IPretccService {
+public class LeoleoServiceImpl extends ServiceImpl<LeoleoMapper, Leoleo> implements ILeoleoService {
 
 }

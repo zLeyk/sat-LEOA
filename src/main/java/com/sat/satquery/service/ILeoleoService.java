@@ -1,6 +1,6 @@
-package com.sat.hostinfo.service;
+package com.sat.satquery.service;
 
-import com.sat.hostinfo.entity.Info;
+import com.sat.satquery.entity.Leoleo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Archie
  * @since 2023-08-15
  */
-public interface IInfoService extends IService<Info> {
+public interface ILeoleoService extends IService<Leoleo> {
 
 }
