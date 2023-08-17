@@ -90,9 +90,13 @@ public class LeoTccAuthTask implements Runnable {
         }
         String s = sb.toString();
         System.out.println("Step3:");
+        System.out.println("INPUT"+preleo.getDkauth()+preleo.getDkenc());
         //合成CK
         String CK;
-        String cks = ds.DESencode(preleo.getDkauth()+preleo.getWKenc(),preleo.getK());
+        String cks = new StringBuffer(MD5Utils.encrypt(preleo.getDkauth()+preleo.getDkenc())).reverse().toString();
+        System.out.println(preleo.getDkauth()+preleo.getDkenc());
+        System.out.println(preleo.getK());
+        System.out.println("cks"+cks);
         if (cks.length()>=8){
             CK = cks.substring(0,8);
         }else {
