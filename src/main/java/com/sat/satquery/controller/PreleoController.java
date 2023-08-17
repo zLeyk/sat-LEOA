@@ -21,6 +21,7 @@ import java.util.List;
  * @author Archie
  * @since 2023-08-15
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/satquery/preleo")
 public class PreleoController {
