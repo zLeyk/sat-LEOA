@@ -94,60 +94,67 @@ public class LeoTccAuthTask implements Runnable {
         String CK = preleo.getDkauth().substring(0, 4) + preleo.getDkenc().substring(0, 4);
         System.out.println("CK:" + CK);
         //解密数据
-        s = ds.DESdecode(s, CK);
-        System.out.println("解密收到的认证数据:" + s);
+        System.out.println("解密Ck:"+CK);
+        System.out.println("加密认证数据s:"+s);
+        try {
+            s = ds.DESdecode(s, CK);
+            System.out.println("解密收到的认证数据:" + s);
 
-        if (s.split(",").length != 3) {
-            System.out.println("认证失败");
-            writer.close();
-            br.close();
-            client.close();
-        } else {
-            //分解获得的数据
-            //时间
-            String Tre = s.split(",")[0];
-            //Mac
-            String MAC = s.split(",")[1];
-            //随机数R
-            String R = s.split(",")[2];
-
-            //验证
-            long ct = System.currentTimeMillis();  //当前时间
-            //计算XMAC
-            String XMAC = ds.DESencode(R+Tre, preleo.getWKenc());
-
-            if ((ct - Long.parseLong(Tre)) > 2000 || !(XMAC.equals(MAC))) {
-                System.out.println("校验不通过");
+            if (s.split(",").length != 3) {
+                System.out.println("认证失败");
                 writer.close();
                 br.close();
                 client.close();
             } else {
-                String Res = ds.DESencode(R, CK);
-                String req = ct + "," + Res;
-                req = ds.DESencode(req, CK);
-                System.out.println("发送的信息:" + req);
-                writer.write(req);
-                writer.write("eof\n");
-                writer.flush();
+                //分解获得的数据
+                //时间
+                String Tre = s.split(",")[0];
+                //Mac
+                String MAC = s.split(",")[1];
+                //随机数R
+                String R = s.split(",")[2];
 
-                //接受信息
-                sb.setLength(0);
-                while ((temp = br.readLine()) != null) {
-                    if ((index = temp.indexOf("eof")) != -1) {
-                        sb.append(temp.substring(0, index));
-                        break;
+                //验证
+                long ct = System.currentTimeMillis();  //当前时间
+                //计算XMAC
+                String XMAC = ds.DESencode(R+Tre, preleo.getWKenc());
+                if ((ct - Long.parseLong(Tre)) > 2000 || !(XMAC.equals(MAC))) {
+                    System.out.println("校验不通过");
+                    writer.close();
+                    br.close();
+                    client.close();
+                } else {
+                    String Res = ds.DESencode(R, CK);
+                    String req = ct + "," + Res;
+                    req = ds.DESencode(req, CK);
+                    System.out.println("发送的信息:" + req);
+                    writer.write(req);
+                    writer.write("eof\n");
+                    writer.flush();
+
+                    //接受信息
+                    sb.setLength(0);
+                    while ((temp = br.readLine()) != null) {
+                        if ((index = temp.indexOf("eof")) != -1) {
+                            sb.append(temp.substring(0, index));
+                            break;
+                        }
+                        sb.append(temp);
                     }
-                    sb.append(temp);
-                }
 
-                if (sb.toString().equals("认证成功")) {
-                    setSt("认证成功");
+                    if (sb.toString().equals("认证成功")) {
+                        System.out.println("认证成功");
+                        setSt("认证成功");
+                    }
+                    writer.close();
+                    br.close();
+                    client.close();
                 }
-                writer.close();
-                br.close();
-                client.close();
             }
+        }catch (Exception e){
+            System.out.println("认证失败");
         }
+
     }
 }
 
