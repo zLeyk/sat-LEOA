@@ -109,34 +109,35 @@ public class LeoTccAuthTask implements Runnable {
         long ct = System.currentTimeMillis();  //当前时间
         //计算XMAC
         String XMAC = ds.DESencode(Tre + R, preleo.getWKenc());
-        if((ct-Long.parseLong(Tre))>2000&&(XMAC==MAC)){
+        if((ct-Long.parseLong(Tre))>2000||(XMAC!=MAC)){
             System.out.println("校验不通过");
             writer.close();
             br.close();
             client.close();
-        }
-        String Res = ds.DESencode(R,CK);
-        String req = ct +"," + Res;
-        req = ds.DESencode(req,CK);
-        System.out.println("发送的信息:"+req);
-        writer.write(req);
-        writer.write("eof\n");
-        writer.flush();
-        sb.setLength(0);
-        while ((temp=br.readLine()) != null) {
-            if ((index = temp.indexOf("eof")) != -1) {
-                sb.append(temp.substring(0, index));
-                break;
+        }else {
+            String Res = ds.DESencode(R, CK);
+            String req = ct + "," + Res;
+            req = ds.DESencode(req, CK);
+            System.out.println("发送的信息:" + req);
+            writer.write(req);
+            writer.write("eof\n");
+            writer.flush();
+            sb.setLength(0);
+            while ((temp = br.readLine()) != null) {
+                if ((index = temp.indexOf("eof")) != -1) {
+                    sb.append(temp.substring(0, index));
+                    break;
+                }
+                sb.append(temp);
             }
-            sb.append(temp);
-        }
 
-        if (sb.toString().equals("认证成功")){
-            setSt("认证成功");
+            if (sb.toString().equals("认证成功")) {
+                setSt("认证成功");
+            }
+            writer.close();
+            br.close();
+            client.close();
         }
-        writer.close();
-        br.close();
-        client.close();
     }
 }
 
