@@ -91,7 +91,15 @@ public class LeoTccAuthTask implements Runnable {
         String s = sb.toString();
         System.out.println("Step3:");
         //合成CK
-        String CK = preleo.getDkauth().substring(0, 4) + preleo.getDkenc().substring(0, 4);
+        String CK;
+        String cks = ds.DESencode(preleo.getDkauth()+preleo.getWKenc(),preleo.getK());
+        if (cks.length()>=8){
+            CK = cks.substring(0,8);
+        }else {
+            CK = cks+'a'*(8-cks.length());
+        }
+
+
         System.out.println("CK:" + CK);
         //解密数据
         System.out.println("解密Ck:"+CK);
