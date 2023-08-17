@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>卫星A认证控制台</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+<div id="root">
+    <el-container direction="vertical">
+        <el-header style="background-color: #222831;">
+            <!-- Header content -->
+            <el-menu default-active="activeIndex2" class="el-menu-demo" mode="horizontal" background-color="#222831"
+                     text-color="#eeeeee" active-text-color="#00adb5">
+                <el-menu-item index="1">
+                    <i style="font-size: 30px;" class="el-icon-cpu"></i>
+                    卫星A认证控制台
+                </el-menu-item>
+            </el-menu>
+        </el-header>
+
+        <el-container direction="horizontal">
+            <el-aside width="250px" style="background-color: #393e46;">
+                <!-- Aside content -->
+                <el-menu :unique-opened="true" default-active="sat-pre-info-table" class="el-menu-vertical-demo"
+                         @select="switchPage" background-color="#393e46" text-color="#eeeeee"
+                         active-text-color="#00adb5">
+                    <el-menu-item index="sat-pre-info-table">卫星预置信息表</el-menu-item>
+                    <el-menu-item index="sat-sg-auth-info-table">星间认证信息表</el-menu-item>
+                </el-menu>
+            </el-aside>
+            <el-main height="">
+                <!-- Main content -->
+                <div v-if="cur_page == 'sat-pre-info-table'">
+                    <el-card :key="1" class="box-card">
+                        <div slot="header" class="clearfix">
+                            <el-row :gutter="0">
+                                <el-col :span="12" :offset="0">
+                                    <span style="font-size: 20px; font-weight: 600;">预置信息表</span>
+                                </el-col>
+                                <el-col :span="2" :offset="10">
+                                    <el-button @click="submit_sg_auth" type="primary" round>发起星地认证</el-button>
+                                </el-col>
+                            </el-row>
+                        </div>
+                        <template>
+                            <el-table stripe
+                                      :data="tableData.filter(data => !search || data.idsat.toString().toLowerCase() === search.toLowerCase())"
+                                      :data="tableData" max-height="700px" border style="width: 100%">
+                                <el-table-column prop="idsat" label="卫星身份信息(IDsat)" width="180">
+                                </el-table-column>
+                                <el-table-column prop="ssid" label="卫星广播身份(SSID)" width="180">
+                                </el-table-column>
+                                <el-table-column prop="dkenc" label="默认加密密钥(DKenc)" width="180">
+                                </el-table-column>
+                                <el-table-column prop="dkauth" label="默认认证密钥(DKauth)" width="180">
+                                </el-table-column>
+                                <el-table-column prop="wkenc" label="工作加密密钥(WKenc)" width="180">
+                                </el-table-column>
+                                <el-table-column prop="k" label="身份保护密钥(K)" width="160">
+                                </el-table-column>
+                                <el-table-column prop="ck" label="会话密钥(CK)" width="160">
+                                </el-table-column>
+                                <el-table-column prop="mainKey" label="主密钥(MainKey)" width="160">
+                                </el-table-column>
+                                <el-table-column align="center">
+                                    <template slot="header" slot-scope="scope">
+                                        <el-input v-model="search" size="mini" placeholder="输入IDsat搜索" />
+                                    </template>
+                                    <template slot-scope="scope">
+                                        <el-popover placement="left" width="300" trigger="click">
+                                            <el-form size="mini" label-position="top" ref="form"
+                                                     :model="edit_temp_form.cur_table_data">
+                                                <el-form-item required label="卫星广播身份(SSID)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.ssid"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="默认加密密钥(DKenc)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.dkenc"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="默认认证密钥(DKauth)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.dkauth"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="工作加密密钥(WKenc)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.wkenc"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="身份保护密钥(K)">
+                                                    <el-input v-model="edit_temp_form.cur_table_data.k"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="会话密钥(CK)">
+                                                    <el-input v-model="edit_temp_form.cur_table_data.ck"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="主密钥(MainKey)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.mainKey"></el-input>
+                                                </el-form-item>
+                                                <el-form-item>
+                                                    <el-button type="primary" @click="onSubmit">确认修改</el-button>
+                                                </el-form-item>
+                                            </el-form>
+                                            <el-button size="mini" @click="handleEdit(scope.$index, scope.row)"
+                                                       slot="reference">编辑</el-button>
+                                        </el-popover>
+                                        <el-button size="mini" type="danger"
+                                                   @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </template>
+                        <el-row type="flex" :gutter="0" justify="center" style="padding-top: 1%;">
+                            <el-col :span="5" :offset="0">
+                                <el-pagination prev-text="&lt;上一页" next-text="下一页&gt;" :pager-count="5" layout="prev, slot, next" :current-page.sync="cur_page_num" @current-change="handleCurrentChange"
+                                               :page-size="15" :total="total_page_num">
+                                    <span style="padding-left: 50px; padding-right: 50px; font-size: 15px;">第 {{ cur_page_num }} 页</span>
+                                </el-pagination>
+                            </el-col>
+                        </el-row>
+                    </el-card>
+                </div>
+                <div v-else>
+                    <el-card :key="2" class="box-card">
+                        <div slot="header" class="clearfix">
+                            <el-row :gutter="0">
+                                <el-col :span="12" :offset="0">
+                                    <span style="font-size: 20px; font-weight: 600;">星间认证信息表</span>
+                                </el-col>
+                                <el-col :span="2" :offset="10">
+                                    <el-button @click="submit_ll_auth" type="primary" round>发起星间认证</el-button>
+                                </el-col>
+                            </el-row>
+                        </div>
+                        <template>
+                            <el-table stripe
+                                      :data="tableData.filter(data => !search || data.idsat.toString().toLowerCase() === search.toLowerCase())"
+                                      :data="tableData" max-height="700px" border style="width: 100%">
+                                <el-table-column prop="idsat" label="卫星身份信息(IDsat)" width="160">
+                                </el-table-column>
+                                <el-table-column prop="ssid" label="卫星广播身份(SSID)" width="220">
+                                </el-table-column>
+                                <el-table-column prop="tida" label="卫星临时身份A(Tida)" width="220">
+                                </el-table-column>
+                                <el-table-column prop="tidb" label="卫星临时身份B(Tidb)" width="220">
+                                </el-table-column>
+                                <el-table-column prop="st" label="认证状态(ST)" width="220">
+                                </el-table-column>
+                                <el-table-column prop="token" label="认证令牌(Token)" width="220">
+                                </el-table-column>
+                                <el-table-column align="center">
+                                    <template slot="header" slot-scope="scope">
+                                        <el-input v-model="search" size="mini" placeholder="输入IDsat搜索" />
+                                    </template>
+                                    <template slot-scope="scope">
+                                        <el-popover placement="left" width="300" trigger="click">
+                                            <el-form size="mini" label-position="top" ref="form"
+                                                     :model="edit_temp_form.cur_table_data">
+                                                <el-form-item required label="卫星广播身份(SSID)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.ssid"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="卫星临时身份A(Tida)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.tida"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="卫星临时身份B(Tidb)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.tidb"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="认证状态(ST)">
+                                                    <el-input v-model="edit_temp_form.cur_table_data.st"></el-input>
+                                                </el-form-item>
+                                                <el-form-item required label="认证令牌(Token)">
+                                                    <el-input
+                                                            v-model="edit_temp_form.cur_table_data.token"></el-input>
+                                                </el-form-item>
+                                                <el-form-item>
+                                                    <el-button type="primary" @click="onSubmit">确认修改</el-button>
+                                                </el-form-item>
+                                            </el-form>
+                                            <el-button size="mini" @click="handleEdit(scope.$index, scope.row)"
+                                                       slot="reference">编辑</el-button>
+                                        </el-popover>
+                                        <el-button size="mini" type="danger"
+                                                   @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </template>
+                        <el-row type="flex" :gutter="0" justify="center" style="padding-top: 1%;">
+                            <el-col :span="5" :offset="0">
+                                <el-pagination prev-text="&lt;上一页" next-text="下一页&gt;" :pager-count="5" layout="prev, slot, next" :current-page.sync="cur_page_num" @current-change="handleCurrentChange"
+                                               :page-size="15" :total="total_page_num">
+                                    <span style="padding-left: 50px; padding-right: 50px; font-size: 15px;">第 {{ cur_page_num }} 页</span>
+                                </el-pagination>
+                            </el-col>
+                        </el-row>
+                    </el-card>
+                </div>
+            </el-main>
+        </el-container>
+    </el-container>
+</div>
+
+<!-- 引入组件库 -->
+<script src="../js/vue.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript">
+    const app = new Vue({
+        el: "#root",
+        data: {
+            search: '',
+            cur_page: "sat-pre-info-table",
+            cur_page_num: 1,
+            total_page_num: 300,
+            edit_temp_form: {
+                cur_idx: 0,
+                cur_table_data: {}
+            },
+            tableData: []
+        },
+        watch: {
+            cur_page: {
+                handler: function (newval, oldval) {
+                    this.getDataByPage(newval, 1, 15);
+                },
+                immediate: true
+            }
+        },
+        methods: {
+            getDataByPage(table_name, page_num, page_size) {
+                var that = this;
+                switch (table_name) {
+                    case "sat-pre-info-table":
+                        axios.get("http://localhost:8081/satquery/preleo/getPreLeoInfoByPage?curPage=" + page_num + "&pageSize=" + page_size).then
+                        (function (response) {
+                            console.log("卫星A预置信息表获取成功");
+                            that.total_page_num = response.data.total;
+                            that.tableData = response.data.list;
+                        }, function (err) {
+                            console.log("卫星A预置信息表数据获取失败");
+                        })
+                        break
+                    case "sat-sg-auth-info-table":
+                        axios.get("http://localhost:8081/satquery/leoleo/getLeoLeoInfoByPage?curPage=" + page_num + "&pageSize=" + page_size).then
+                        (function (response) {
+                            console.log("卫星A星间认证信息表获取成功");
+                            that.total_page_num = response.data.total;
+                            that.tableData = response.data.list;
+                        }, function (err) {
+                            console.log("卫星A星间认证信息表数据获取失败");
+                        })
+                        break
+                    default:
+                }
+            },
+            handleCurrentChange(val) {
+                this.getDataByPage(this.cur_page, val, 15);
+            },
+            switchPage(index, indexPath) {
+                this.cur_page = index;
+            },
+            handleEdit(index, row) {
+                this.edit_temp_form.cur_idx = index;
+                // 深拷贝
+                this.edit_temp_form.cur_table_data = JSON.parse(JSON.stringify(this.tableData[index]));
+            },
+            handleDelete(index, row) {
+                this.edit_temp_form.cur_idx = index;
+                // 深拷贝
+                this.edit_temp_form.cur_table_data = JSON.parse(JSON.stringify(this.tableData[index]));
+                this.$confirm('此操作将永久删除该条目, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    var req_prefix = "http://localhost:8081/satquery/";
+                    switch (this.cur_page) {
+                        case "sat-pre-info-table":
+                            req_prefix = req_prefix + "preleo/deletePreLeoByIDsat/"
+                            break
+                        case "sat-sg-auth-info-table":
+                            req_prefix = req_prefix + "leoleo/deleteLeoLeoByIDsat/"
+                            break
+                        default:
+                    }
+                    axios.delete(req_prefix + this.tableData[index].idsat).then(res => {
+                        if (res.data) {
+                            this.tableData.splice(index, 1);
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功!'
+                            });
+                        } else {
+                            this.$message({
+                                type: 'error',
+                                message: '删除失败!'
+                            });
+                        }
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            onSubmit() {
+                var req_prefix = "http://localhost:8081/satquery/";
+                switch (this.cur_page) {
+                    case "sat-pre-info-table":
+                        req_prefix = req_prefix + "preleo/updatePreLeo"
+                        break
+                    case "sat-sg-auth-info-table":
+                        req_prefix = req_prefix + "leoleo/updateLeoLeo"
+                        break
+                    default:
+                }
+                axios.put(req_prefix, this.edit_temp_form.cur_table_data).then((res) => {
+                    if (res.data) {
+                        this.$set(this.tableData, this.edit_temp_form.cur_idx, this.edit_temp_form.cur_table_data);
+                        this.$message({
+                            type: 'success',
+                            message: '修改成功!'
+                        });
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: '修改失败!'
+                        });
+                    }
+                })
+            },
+            submit_sg_auth() {
+                console.log("sg");
+            },
+            submit_ll_auth() {
+                console.log("ll");
+            }
+        }
+    })
+</script>
+</body>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #eeeeee;
+    }
+
+    #root,
+    html,
+    body,
+    #app,
+    .el-container {
+        height: 100%;
+    }
+</style>
+
+</html>

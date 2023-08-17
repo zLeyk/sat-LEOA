@@ -1,13 +1,13 @@
 package com.sat.satquery.controller;
 
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.sat.satquery.entity.Preleo;
 import com.sat.satquery.service.IPreleoService;
 import com.sat.utils.LeoTccAuthTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -48,6 +48,23 @@ public class PreleoController {
         }
 
         return t.getSt();
+    }
+
+    @GetMapping("/getPreLeoInfoByPage")
+    public PageInfo<Preleo> getPreLeoInfoByPage(@RequestParam(defaultValue = "1") int curPage, @RequestParam(defaultValue = "15") int pageSize) {
+        PageHelper.startPage(curPage, pageSize);
+        return new PageInfo<>(iPreleoService.list());
+    }
+
+    @DeleteMapping("/deletePreLeoByIDsat/{idsat}")
+    public boolean deletePreLeoByIDsat(@PathVariable int idsat) {
+        return iPreleoService.removeById(idsat);
+    }
+
+    @PutMapping("/updatePreLeo")
+    public boolean updatePreLeo(@RequestBody Preleo newInfo) {
+        System.out.println(newInfo);
+        return iPreleoService.updateById(newInfo);
     }
 
 }
