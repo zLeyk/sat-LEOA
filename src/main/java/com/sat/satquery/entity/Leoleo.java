@@ -40,5 +40,55 @@ package com.sat.satquery.entity;
         @TableField("Token")
     private String Token;
 
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
 
+    public Integer getIDsat() {
+        return IDsat;
+    }
+
+    public void setIDsat(Integer IDsat) {
+        this.IDsat = IDsat;
+    }
+
+    public String getSsid() {
+        return ssid;
+    }
+
+    public void setSsid(String ssid) {
+        this.ssid = ssid;
+    }
+
+    public String getTida() {
+        return Tida;
+    }
+
+    public void setTida(String tida) {
+        Tida = tida;
+    }
+
+    public String getTidb() {
+        return Tidb;
+    }
+
+    public void setTidb(String tidb) {
+        Tidb = tidb;
+    }
+
+    public Integer getSt() {
+        return st;
+    }
+
+    public void setSt(Integer st) {
+        this.st = st;
+    }
+
+    public String getToken() {
+        return Token;
+    }
+
+    public void setToken(String token) {
+        Token = token;
+    }
 }

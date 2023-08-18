@@ -1,5 +1,6 @@
 package com.sat;
 
+import com.sat.utils.LEOTask;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -29,7 +30,7 @@ public class SatApplication {
             //server尝试接收其他Socket的连接请求，server的accept方法是阻塞式的
             Socket socket = server.accept();
             //每接收到一个Socket就建立一个新的线程来处理它
-            new Thread(new Task(socket)).start();
+            new Thread(new LEOTask(socket)).start();
         }
     }
     /**
