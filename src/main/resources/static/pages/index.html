@@ -336,7 +336,14 @@
                 })
             },
             submit_sg_auth() {
-                console.log("sg");
+                axios.get("http://localhost:8081/satquery/tccleo/auth").then((res)=>{
+
+                    if(res.data === "认证成功"){
+                        this.$message.success(res.data);
+                    }else {
+                        this.$message.error(res.data);
+                    }
+                });
             },
             submit_ll_auth() {
                 console.log("ll");

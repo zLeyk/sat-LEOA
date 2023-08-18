@@ -9,6 +9,7 @@ import com.sat.satquery.service.IPretccService;
 import com.sat.satquery.service.ITccleoService;
 import com.sat.utils.LeoTccAuthTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +42,7 @@ public class TccleoController {
     }
 
 
-    @RequestMapping("/auth")
+    @GetMapping("/auth")
     public String Auth() throws IOException {
         Socket socket = new Socket("127.0.0.1",8899);
         List<Preleo> list = iPreleoService.list();
