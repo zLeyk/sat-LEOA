@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -102,10 +103,17 @@ public class LeoLeoAuthTask implements Runnable {
         //读取发送的信息
         BufferedReader br = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"));
         //设置超时间为10秒
+
         //client.setSoTimeout(10*1000);
         StringBuffer sb = new StringBuffer();
         String temp;
         int index;
+        //设置超时间为10秒
+        try {
+            client.setSoTimeout(10 * 1000);
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
         try {
             while ((temp=br.readLine()) != null) {
                 if ((index = temp.indexOf("eof")) != -1) {

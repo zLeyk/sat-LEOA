@@ -46,6 +46,12 @@ public class SanfanServerReadThread implements Runnable {
         StringBuilder sb = new StringBuilder();
         String temp;
         int index;
+        //设置超时间为10秒
+        try {
+            socket.setSoTimeout(10 * 1000);
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
         while ((temp=br.readLine()) != null) {
             if ((index = temp.indexOf("eof")) != -1) {
                 sb.append(temp.substring(0, index));

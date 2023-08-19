@@ -6,19 +6,26 @@ import java.net.*;
 public class LiangfanServerReadThread implements Runnable {
     private Socket socket;
     String msg;
+    private String a= "";;
+
     public LiangfanServerReadThread(Socket socket, String msg) {
         this.socket = socket;
         this.msg = msg;
     }
     public void run() {
         try {
-            handleSocket();
+           a = handleSocket();
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
-    private void handleSocket() throws Exception {
+
+    public String getData(){
+        return a;
+    }
+
+    private String handleSocket() throws Exception {
         System.out.println("来到两方认证子线程完成剩余两方认证操作");
         //在子线程继续而二方认证第三步
         BufferedReader br = null;
@@ -27,7 +34,13 @@ public class LiangfanServerReadThread implements Runnable {
         StringBuilder sb = new StringBuilder();
         String temp;
         int index;
-        while ((temp=br.readLine()) != null) {
+        //设置超时间为10秒
+        try {
+            socket.setSoTimeout(10 * 1000);
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
+        while ((temp = br.readLine()) != null) {
             if ((index = temp.indexOf("eof")) != -1) {
                 sb.append(temp.substring(0, index));
                 break;
@@ -36,13 +49,21 @@ public class LiangfanServerReadThread implements Runnable {
         }
         String newTID_B = sb.toString();
         System.out.println("二方认证第三步，接收B向A发送数据成功");
-        if (newTID_B.equals(msg)){
+        if (newTID_B.equals(msg)) {
             System.out.println("二方认证第三步，整体认证成功");
+            br.close();
+            socket.close();
+            return "1";
 
-        }else {System.out.println("二方认证第三步，整体认证失败");}
-        br.close();
-        socket.close();
-
+        } else {
+            System.out.println("二方认证第三步，整体认证失败");
+            br.close();
+            socket.close();
+            return "0";
+        }
 
     }
+
+
+
 }

@@ -6,6 +6,7 @@ import com.sat.satquery.entity.Preleo;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.sql.*;
 
 public class LEOTask implements Runnable {
@@ -47,6 +48,14 @@ public class LEOTask implements Runnable {
         //socket.setSoTimeout(10*10000);
         String temp;
         int index;
+
+        //设置超时间为10秒
+        try {
+            socket.setSoTimeout(10 * 1000);
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
+
         while ((temp=br.readLine()) != null) {
             if ((index = temp.indexOf("eof")) != -1) {//遇到eof时就结束接收
                 sb.append(temp.substring(0, index));
@@ -134,6 +143,7 @@ public class LEOTask implements Runnable {
                 thread.start();
                 thread.join();
 
+
                 //和地面通信处理完之后也就是LeoLeoTccAuthTask执行完毕继续和B通信
                 //怎么把数据拿出来
                 String E_As = leoLeoAuthTask.getData();
@@ -188,6 +198,7 @@ public class LEOTask implements Runnable {
                 writer.close();
 
 
+
                 String Flag_Token = sanfanServerReadThread.getData();
                 System.out.println(Flag_Token);
                 if (Flag_Token != "0") {
@@ -210,7 +221,9 @@ public class LEOTask implements Runnable {
                     }
 
 
-
+                    sockettcc.close();
+                    socket2.close();
+                    ssocket.close();
                     statement.close();
                     connection.close();
                     br.close();
@@ -218,6 +231,9 @@ public class LEOTask implements Runnable {
 
 
                 } else {
+                    sockettcc.close();
+                    socket2.close();
+                    ssocket.close();
                     statement.close();
                     connection.close();
                     br.close();
@@ -256,14 +272,63 @@ public class LEOTask implements Runnable {
                 //通过A子线程接收来自B子线程写的消息，子线程监听来自B的两方认证子线程端口
                 ServerSocket ssocket = new ServerSocket(9991); //实例化一个基于服务器端的socket对象
                 Socket socket2 = ssocket.accept(); //调用监听功能，侦听9991端口，有信息就直接获得该客户端的socket对象
-                LiangfanServerReadThread thread = new LiangfanServerReadThread(socket2, TID_B2);//实例化子线程，用来取客户端发送的信息
-                new Thread(thread).start(); //实例化子线程对象，并启动子
+                LiangfanServerReadThread liangfanServerReadThread = new LiangfanServerReadThread(socket2, TID_B2);//实例化子线程，用来取客户端发送的信息
+                Thread thread3 = new Thread(liangfanServerReadThread);
+                //new Thread(thread).start(); //实例化子线程对象，并启动子
                 //由主线程来负责发送数据给客户端
+                thread3.start();
+                thread3.join();
+
+                String Flag_liangfan = liangfanServerReadThread.getData();
+                System.out.println("两方之后的认证状态");
+                System.out.println(Flag_liangfan);
+                if (Flag_liangfan.equals("0")){
+                    System.out.println("二次认证失败");
+                }else {
+                    //更改自己星星认证表的三方认证时候存的数据
+                    sql = "UPDATE leoleo set ST = 1 WHERE IDsat = " + leoleoB.getIDsat().toString();
+                    System.out.println(sql);
+                    boolean execute = statement.execute(sql);
+                    //leoleoB.getIDsat();
+                    if(execute){
+                        System.out.println("二次认证成功，更改状态成功自身表");
+                    }else {
+                        System.out.println("二次认证成功，更改状态失败自身表");
+                    }
+
+                    //改对方的数据
+
+                    String urlleob = "jdbc:mysql://localhost:3306/leob";
+                    Connection connectionleob = null;
+                    Statement statementleob = null;
+                    String sqlleob = "";
+                    ResultSet resultSetleob = null;
+                    connectionleob = DriverManager.getConnection(urlleob,"root","123456");
+                    statementleob = connectionleob.createStatement();
+                    try {
+                        //查询语句
+                        sqlleob = "UPDATE leoleo set ST = 1 WHERE IDsat = " + preleo.getIDsat().toString();;
+                        System.out.println(sqlleob);
+                        boolean executeleob = statementleob.execute(sqlleob);
+
+                        resultSetleob.close();
+                    } catch (SQLException e) {
+                        msg = "连接数据库失败";
+                        throw new RuntimeException(e);
+                    }
+                    connectionleob.close();
+                    statementleob.close();
+
+
+
+                }
 
 
                 connection.close();
                 statement.close();
                 br.close();
+                ssocket.close();
+                socket2.close();
                 socket.close();
             }
         }

@@ -26,13 +26,20 @@ public class SatApplication {
         int port = 8897;
         //定义一个ServerSocket监听在端口8897上 8897就是卫星A自身的端口信息
         ServerSocket server = new ServerSocket(port);
+        //server.close();
+
         //用于监测是否收到广播信息时发给自己的
         while (true) {
             //server尝试接收其他Socket的连接请求，server的accept方法是阻塞式的
             Socket socket = server.accept();
             //每接收到一个Socket就建立一个新的线程来处理它
             new Thread(new LEOTask(socket)).start();
+
+            //socket.close();
+
         }
+
+
     }
     /**
      * 用来处理Socket请求的
