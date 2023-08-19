@@ -127,6 +127,7 @@ public class LEOTask implements Runnable {
                 //String host = ;
                 //String port = ;
                 // 传入Socket 和 卫星的预置信息(通过前面注解的JDBC查)和地面开始通信建立了一个新线程，查数据库
+                //查询地面端口和IP地面端口
                 Socket sockettcc = new Socket("127.0.0.1", 8899);
                 LeoLeoAuthTask leoLeoAuthTask = new LeoLeoAuthTask(sockettcc, preleo, SSID_B);
                 Thread thread = new Thread(leoLeoAuthTask);
@@ -176,6 +177,8 @@ public class LEOTask implements Runnable {
                 //三方认证Step 5  接受B返回的消息解密获得随机数，B临时身份，加密后的Token
                 //通过A子线程SanfanServerReadThread接收来自B子线程写的消息解密获得随机数，B临时身份，加密后的Token
                 //在线程里面计算认证操作
+                //该监听端口是新创立的和Info里面的所有数据都不能一样
+                // 只是表示子线程监听的端口，和B主线程里的三方认证子线程端口一样
                 ServerSocket ssocket = new ServerSocket(9990); //实例化一个基于服务器端的socket对象
                 Socket socket2 = ssocket.accept(); //调用监听功能，侦听9998端口，有信息就直接获得该客户端的socket对象
                 SanfanServerReadThread sanfanServerReadThread = new SanfanServerReadThread(socket2, preleo, TID_B);//实例化子线程，用来取客户端发送的信息
@@ -250,9 +253,9 @@ public class LEOTask implements Runnable {
                 System.out.println("二方认证第三步，开始");
                 String TID_B2 = leoleoB.getTidb();
 
-                //通过A子线程接收来自B子线程写的消息
-                ServerSocket ssocket = new ServerSocket(9798); //实例化一个基于服务器端的socket对象
-                Socket socket2 = ssocket.accept(); //调用监听功能，侦听9998端口，有信息就直接获得该客户端的socket对象
+                //通过A子线程接收来自B子线程写的消息，子线程监听来自B的两方认证子线程端口
+                ServerSocket ssocket = new ServerSocket(9991); //实例化一个基于服务器端的socket对象
+                Socket socket2 = ssocket.accept(); //调用监听功能，侦听9991端口，有信息就直接获得该客户端的socket对象
                 LiangfanServerReadThread thread = new LiangfanServerReadThread(socket2, TID_B2);//实例化子线程，用来取客户端发送的信息
                 new Thread(thread).start(); //实例化子线程对象，并启动子
                 //由主线程来负责发送数据给客户端
