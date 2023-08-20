@@ -148,8 +148,8 @@
                                 </el-table-column>
                                 <el-table-column prop="st" label="认证状态(ST)" width="220">
                                     <template scope="scope">
-                                        <span v-if="scope.row.st === 0" style="color: #F56C6C;">未认证</span>
-                                        <span v-else-if="scope.row.st === 1" style="color: #67C23A">已认证</span>
+                                        <span v-if="scope.row.st === 0 || scope.row.st === '0'" style="color: #F56C6C;">未认证</span>
+                                        <span v-else-if="scope.row.st === 1 || scope.row.st === '1'" style="color: #67C23A">已认证</span>
                                         <span v-else>--</span>
                                     </template>
                                 </el-table-column>
