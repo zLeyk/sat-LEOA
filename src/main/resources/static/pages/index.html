@@ -38,7 +38,7 @@
                         <div slot="header" class="clearfix">
                             <el-row :gutter="0">
                                 <el-col :span="12" :offset="0">
-                                    <span style="font-size: 20px; font-weight: 600;">预置信息表</span>
+                                    <span style="font-size: 30px; font-weight: 600;">预置信息表</span>
                                 </el-col>
                                 <el-col :span="2" :offset="10">
                                     <el-button @click="submit_sg_auth" type="primary" round>发起星地认证</el-button>
@@ -48,7 +48,7 @@
                         <template>
                             <el-table stripe
                                       :data="tableData.filter(data => !search || data.idsat.toString().toLowerCase() === search.toLowerCase())"
-                                      :data="tableData" max-height="700px" border style="width: 100%">
+                                      :data="tableData" max-height="690px" border style="width: 100%">
                                 <el-table-column prop="idsat" label="卫星身份信息(IDsat)" width="180">
                                 </el-table-column>
                                 <el-table-column prop="ssid" label="卫星广播身份(SSID)" width="180">
@@ -127,7 +127,7 @@
                         <div slot="header" class="clearfix">
                             <el-row :gutter="0">
                                 <el-col :span="12" :offset="0">
-                                    <span style="font-size: 20px; font-weight: 600;">星间认证信息表</span>
+                                    <span style="font-size: 30px; font-weight: 600;">星间认证信息表</span>
                                 </el-col>
                                 <el-col :span="2" :offset="10">
                                     <el-button @click="submit_ll_auth" type="primary" round>发起星间认证</el-button>
@@ -137,7 +137,7 @@
                         <template>
                             <el-table stripe
                                       :data="tableData.filter(data => !search || data.idsat.toString().toLowerCase() === search.toLowerCase())"
-                                      :data="tableData" max-height="700px" border style="width: 100%">
+                                      :data="tableData" max-height="690px" border style="width: 100%">
                                 <el-table-column prop="idsat" label="卫星身份信息(IDsat)" width="160">
                                 </el-table-column>
                                 <el-table-column prop="ssid" label="卫星广播身份(SSID)" width="220">
@@ -147,6 +147,11 @@
                                 <el-table-column prop="tidb" label="卫星临时身份B(Tidb)" width="220">
                                 </el-table-column>
                                 <el-table-column prop="st" label="认证状态(ST)" width="220">
+                                    <template scope="scope">
+                                        <span v-if="scope.row.st === 0 || scope.row.st === '0'" style="color: #F56C6C;">未认证</span>
+                                        <span v-else-if="scope.row.st === 1 || scope.row.st === '1'" style="color: #67C23A">已认证</span>
+                                        <span v-else>--</span>
+                                    </template>
                                 </el-table-column>
                                 <el-table-column prop="token" label="认证令牌(Token)" width="220">
                                 </el-table-column>
@@ -203,6 +208,17 @@
             </el-main>
         </el-container>
     </el-container>
+    <el-dialog
+            title="认证过程"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose">
+        <span id = "log">这是一段信息</span>
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+  </span>
+    </el-dialog>
 </div>
 
 <!-- 引入组件库 -->
@@ -213,6 +229,7 @@
     const app = new Vue({
         el: "#root",
         data: {
+            dialogVisible: false,
             search: '',
             cur_page: "sat-pre-info-table",
             cur_page_num: 1,
@@ -336,6 +353,28 @@
                 })
             },
             submit_sg_auth() {
+                this.dialogVisible = true;
+                var xmlhttp;
+                // 1，建立xmlHttpRequest对象
+                if(window.XMLHttpRequest){
+                    xmlhttp = new XMLHttpRequest();
+                }
+                else{
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                // 2，设置回调函数
+                xmlhttp.onreadystatechange=callback;
+                // 3，使用open方法与服务器建立连接
+                xmlhttp.open("GET","log.txt",true);
+                // 4，向服务器端发送数据
+                xmlhttp.send();
+                // 5，在回调函数中针对不同呃响应状态进行处理
+                function callback(){
+                    if(xmlhttp.readyState == 4 && xmlhttp.status == 200){
+                    //注意： onreadystatechange 事件被触发 4 次（0 - 4）, 分别是： 0-1、1-2、2-3、3-4，对应着 readyState 的每个变化。
+                        document.getElementById("log").innerHTML = xmlhttp.responseText;
+                    }
+                }
                 axios.get("http://localhost:8081/satquery/tccleo/auth").then((res)=>{
 
                     if(res.data === "认证成功"){
@@ -344,6 +383,13 @@
                         this.$message.error(res.data);
                     }
                 });
+            },
+            handleClose(done) {
+                this.$confirm('确认关闭？')
+                  .then(_ => {
+                    done();
+                  })
+                  .catch(_ => {});
             },
             submit_ll_auth() {
                 console.log("ll");
