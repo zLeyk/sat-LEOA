@@ -3,6 +3,7 @@ package com.sat.utils;
 import com.sat.satquery.entity.Preleo;
 import com.sat.satquery.service.IPreleoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.*;
 import java.net.Socket;
@@ -44,6 +45,29 @@ public class LeoTccAuthTask implements Runnable {
      * @throws Exception
      */
     private void handleSocket() throws Exception {
+        try{
+            String data = " This content will sappend to the end of the file";
+            /*File file = new File(this.getClass().getClassLoader().getResource("static/pages/log.txt").getPath());
+            //if file doesnt exists, then create it
+            System.out.println(file.getPath());
+            if(!file.exists()){
+                file.createNewFile();
+            }*/
+            String filePath = "/static/pages/log.txt";
+            ClassPathResource readFile = new ClassPathResource(filePath);
+
+            // 获取文件对象
+            File file = readFile.getFile();
+            System.out.println(file.getName());
+
+            //true = append file
+            FileWriter fileWritter = new FileWriter(file.getName(),true);
+            fileWritter.write(data);
+            fileWritter.close();
+            System.out.println("Done");
+        }catch(IOException e){
+            e.printStackTrace();
+        }
         setSt("认证失败");
         System.out.println(preleo);
         DESUtils ds = new DESUtils();
@@ -164,7 +188,9 @@ public class LeoTccAuthTask implements Runnable {
                 }
             }
         }catch (Exception e){
+
             System.out.println("认证失败");
+            System.out.println(e);
         }
 
     }

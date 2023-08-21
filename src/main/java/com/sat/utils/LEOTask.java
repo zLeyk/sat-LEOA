@@ -228,6 +228,7 @@ public class LEOTask implements Runnable {
                     connection.close();
                     br.close();
                     socket.close();
+                    ssocket.close();
 
 
                 } else {
@@ -238,6 +239,7 @@ public class LEOTask implements Runnable {
                     connection.close();
                     br.close();
                     socket.close();
+                    ssocket.close();
 
                 }
 
@@ -311,7 +313,6 @@ public class LEOTask implements Runnable {
                         System.out.println(sqlleob);
                         boolean executeleob = statementleob.execute(sqlleob);
 
-                        resultSetleob.close();
                     } catch (SQLException e) {
                         msg = "连接数据库失败";
                         throw new RuntimeException(e);
