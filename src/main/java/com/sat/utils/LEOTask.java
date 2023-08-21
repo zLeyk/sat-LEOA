@@ -66,14 +66,16 @@ public class LEOTask implements Runnable {
         }
 
         String s = sb.toString();// s是收到的信息
-        System.out.println("三方认证第一步，收到B发来的SSID");
+        System.out.println("Step2：");
+        //System.out.println("B发广播信息，发给A的信息是:"+msg);
+        System.out.println("LEO-A接收LEO-B信息："+s);
 
 
         //Step2 判断是不是地面跟自己通信如果是1则，是B发来的和自己的通信消息，首先对该卫星的 SSID进行识别。
         // 根据得到的SSIDB ，判断是二方通信还是三方通信
         String s1 = s.split(",")[0];
-        //System.out.println(s1);
         if (s1.equals("1")){
+            System.out.println("判断B发来的信息是否是和自己通信：是");
             String s2 = s.split(",")[1];
             Integer SSID_B = Integer.valueOf(s2);
             //System.out.println(SSID_B);
@@ -121,14 +123,10 @@ public class LEOTask implements Runnable {
             }
             resultSet.close();
 
-            // 判断三方还是两方认证
-            System.out.println("判断三方还是两方认证");
-
-
 
             if (exist == 0) {
                 resultSet2.close();
-                System.out.println("进行三方认证");
+                System.out.println("判断进行三方认证还是两方认证：三方认证");
                 //如果三方认证
 
                 //System.out.println(preleo);
@@ -147,13 +145,15 @@ public class LEOTask implements Runnable {
                 //和地面通信处理完之后也就是LeoLeoTccAuthTask执行完毕继续和B通信
                 //怎么把数据拿出来
                 String E_As = leoLeoAuthTask.getData();
-                System.out.println("拿出来了和地面通信建立的子线程的数据了");
-                System.out.println(E_As);
+                //System.out.println("拿出来了和地面通信建立的子线程的数据了");
+
+                System.out.println("Step4");
+                System.out.println("LEO-A接收TCC信息："+E_As);
 
 
                 //Step3 根据A的会话密钥解密获得A的临时身份B的真实身份，临时身份真实身份和时间戳
                 String E_A = ds.DESdecode(E_As, preleo.getCk());
-                //System.out.println(E_A);
+                System.out.println("LEO-A解密信息："+E_A);
                 String TID_A = E_A.split(",")[0] + "," + E_A.split(",")[1];
                 String ID_B = E_A.split(",")[2];
                 String TID_B = E_A.split(",")[3] + "," + E_A.split(",")[4];
@@ -181,7 +181,8 @@ public class LEOTask implements Runnable {
                 writer.write(msg_B);
                 writer.write("eof\n");
                 writer.flush();
-                System.out.println("三方认证第三步，A向B发送数据成功");
+                System.out.println("LEO-A向LEO-B发送信息："+msg_B);
+
 
 
                 //三方认证Step 5  接受B返回的消息解密获得随机数，B临时身份，加密后的Token
@@ -200,10 +201,10 @@ public class LEOTask implements Runnable {
 
 
                 String Flag_Token = sanfanServerReadThread.getData();
-                System.out.println(Flag_Token);
+                //System.out.println(Flag_Token);
                 if (Flag_Token != "0") {
 
-                    System.out.println("A可以插入三方认证的数据了");
+                    System.out.println("LEO-A向卫星认证表插入三方认证数据");
                     int IDsat_B = Integer.valueOf(ID_B);
                     int SSid_B = SSID_B;
                     try {
@@ -243,8 +244,8 @@ public class LEOTask implements Runnable {
 
 
             } else {
+                System.out.println("判断进行三方认证还是两方认证：二方认证");
 
-                System.out.println("进行二方认证");
                 //二方认证  Step1 根据获得B——SSID获得leoelo表中IDsat为B的一行数据，将时间戳，临时身份A和 Token发给B
 
                 //当前时间
@@ -253,20 +254,20 @@ public class LEOTask implements Runnable {
 
                 //生成新的请求
                 String msg_B = "2" + "," + ct + ","+ preleo.getIDsat().toString() + ","+ leoleoB.getTida().toString() + "," + leoleoB.getToken();
-                System.out.println(msg_B);
+                //System.out.println(msg_B);
 
                 //将信息发送给B
                 Writer writer = new OutputStreamWriter(socket.getOutputStream(), "GBK");
                 writer.write(msg_B);
                 writer.write("eof\n");
                 writer.flush();
-                System.out.println("二方认证第一步，A向B发送数据成功");
+                System.out.println("LEO-A向LEO-B发送信息："+msg_B);
 
 
                 //二方认证  Step3
 
                 //读取来自B的消息，获得临时身份B，将临时身份B和之前Step1获得的临时身份B作比较
-                System.out.println("二方认证第三步，开始");
+                System.out.println("Step4:");
                 String TID_B2 = leoleoB.getTidb();
 
                 //通过A子线程接收来自B子线程写的消息，子线程监听来自B的两方认证子线程端口
@@ -280,21 +281,22 @@ public class LEOTask implements Runnable {
                 thread3.join();
 
                 String Flag_liangfan = liangfanServerReadThread.getData();
-                System.out.println("两方之后的认证状态");
-                System.out.println(Flag_liangfan);
+                //System.out.println("两方之后的认证状态");
+                //System.out.println(Flag_liangfan);
                 if (Flag_liangfan.equals("0")){
-                    System.out.println("二次认证失败");
+                    //System.out.println("二次认证失败");
                 }else {
                     //更改自己星星认证表的三方认证时候存的数据
                     sql = "UPDATE leoleo set ST = 1 WHERE IDsat = " + leoleoB.getIDsat().toString();
-                    System.out.println(sql);
+                    //System.out.println(sql);
                     boolean execute = statement.execute(sql);
+                    System.out.println("二次认证成功，更改自身认证表成功");
                     //leoleoB.getIDsat();
-                    if(execute){
-                        System.out.println("二次认证成功，更改状态成功自身表");
-                    }else {
-                        System.out.println("二次认证成功，更改状态失败自身表");
-                    }
+//                    if(execute){
+//                        System.out.println("二次认证成功，更改状态成功自身表");
+//                    }else {
+//                        System.out.println("二次认证成功，更改状态失败自身表");
+//                    }
 
                     //改对方的数据
 
@@ -302,16 +304,17 @@ public class LEOTask implements Runnable {
                     Connection connectionleob = null;
                     Statement statementleob = null;
                     String sqlleob = "";
-                    ResultSet resultSetleob = null;
+                    //ResultSet resultSetleob = null;
                     connectionleob = DriverManager.getConnection(urlleob,"root","123456");
                     statementleob = connectionleob.createStatement();
                     try {
                         //查询语句
                         sqlleob = "UPDATE leoleo set ST = 1 WHERE IDsat = " + preleo.getIDsat().toString();;
-                        System.out.println(sqlleob);
+                        //System.out.println(sqlleob);
                         boolean executeleob = statementleob.execute(sqlleob);
+                        System.out.println("二次认证成功，更改B认证表成功");
 
-                        resultSetleob.close();
+                        //resultSetleob.close();
                     } catch (SQLException e) {
                         msg = "连接数据库失败";
                         throw new RuntimeException(e);

@@ -56,7 +56,7 @@ public class LeoLeoAuthTask implements Runnable {
         String url = "jdbc:mysql://localhost:3306/leoa";
         Connection connection = DriverManager.getConnection(url,"root","123456");
         Statement statement = connection.createStatement();
-        System.out.println(preleo);
+        System.out.println("本卫星预置表信息："+preleo);
         DESUtils ds = new DESUtils();
         // 三方认证Step1 向地面发送带标记的和自身Id, SSID_B和时间戳并且经过加密的消息
         //发送的消息 标记为1  后面tcc处理的时候根据1判断是星地认证 还是星间认证
@@ -85,17 +85,18 @@ public class LeoLeoAuthTask implements Runnable {
         //System.out.println(str1);
         //System.out.println(str2);
         String msg_A = "0"+ str1+","+str2 +","+ t;
-        System.out.println(msg_A);
-        String msg ="1," + ds.DESencode(msg_A,preleo.getK());
+        String msgA = ds.DESencode(msg_A,preleo.getK());
+        System.out.println("LEO-A加密信息:"+msgA);
+        String msg ="1," + msgA ;
 
-        System.out.println(msg);
+        System.out.println("LEO-A向TCC发送信息:"+msgA);
 
         //向Tcc发送消息
         Writer writer = new OutputStreamWriter(client.getOutputStream(), "GBK");
         writer.write(msg);
         writer.write("eof\n");
         writer.flush();
-        System.out.println("三方第一步，A向TCC发送数据成功");
+        //System.out.println("发送信息：");
 
 
         //三方认证 Step 3 接收地面发来的消息对前半部分进行解密，获得需要的信息，验证时间戳 合成新请求发送给B
@@ -126,8 +127,8 @@ public class LeoLeoAuthTask implements Runnable {
             System.out.println("数据读取超时。");
         }
         String s = sb.toString();
-        System.out.println("三方第三步，A获取需要解密信息");
-        System.out.println(s);
+        //System.out.println("三方第三步，A获取需要解密信息");
+        //System.out.println(s);
 
         writer.close();
         br.close();

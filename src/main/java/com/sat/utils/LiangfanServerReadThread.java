@@ -26,7 +26,7 @@ public class LiangfanServerReadThread implements Runnable {
     }
 
     private String handleSocket() throws Exception {
-        System.out.println("来到两方认证子线程完成剩余两方认证操作");
+        //System.out.println("来到两方认证子线程完成剩余两方认证操作");
         //在子线程继续而二方认证第三步
         BufferedReader br = null;
         br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
@@ -48,15 +48,17 @@ public class LiangfanServerReadThread implements Runnable {
             sb.append(temp);
         }
         String newTID_B = sb.toString();
-        System.out.println("二方认证第三步，接收B向A发送数据成功");
+        System.out.println("LEO-A接收LEO-B信息："+newTID_B);
         if (newTID_B.equals(msg)) {
-            System.out.println("二方认证第三步，整体认证成功");
+            System.out.println("LEO-A校验数据");
+            System.out.println("二次认证成功");
             br.close();
             socket.close();
             return "1";
 
         } else {
-            System.out.println("二方认证第三步，整体认证失败");
+            System.out.println("LEO-A校验数据");
+            System.out.println("二次认证失败");
             br.close();
             socket.close();
             return "0";

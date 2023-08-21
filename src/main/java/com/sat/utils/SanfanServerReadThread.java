@@ -37,7 +37,8 @@ public class SanfanServerReadThread implements Runnable {
 
     private String  handleSocket() throws Exception {
         DESUtils ds = new DESUtils();
-        System.out.println("来到三方认证子线程来完成第四五步");
+        //System.out.println("来到三方认证子线程来完成第四五步");
+        System.out.println("Step6:");
         //在子线程继续而三方认证第四步，接受来自B的数据
 
         BufferedReader br = null;
@@ -62,38 +63,38 @@ public class SanfanServerReadThread implements Runnable {
 
 
         String msgb = sb.toString();
-        System.out.println("三方认证第四步，获得传来的数据");
-        System.out.println(msgb);
+        System.out.println("LEO-A接收LEO-B信息："+msgb);
+        //System.out.println(msgb);
         String R = msgb.split(",")[0];
         String TID_B2 = msgb.split(",")[1] + "," + msgb.split(",")[2];
 
         //计算CK会话密钥,注意因为加密原因必须8位，CK取前8位置,和B中过程一样的目的就是得到和B一样的CK
         String C_K = ds.DESencode(R,preleo.getMainKey());
-        System.out.println(C_K);
+        //System.out.println(C_K);
         String CK = C_K.substring(0, 8);
-        System.out.println(CK);
+        //System.out.println(CK);
 
         //利用CK进行解密Token获得时间戳和校验码，比较时间戳和校验码是否一致
         String Token = ds.DESdecode(msgb.split(",")[3], CK);
-        System.out.println(Token);
+        //System.out.println(Token);
         String Tt = Token.split(",")[1];
         String MAC = Token.split(",")[3];
 
         //计算MAC
         String XMAC = ds.DESencode(R + Tt + TID_B, preleo.getMainKey());
-        System.out.println(XMAC);
+        System.out.println("获得校验码："+XMAC);
         long Ttt = System.currentTimeMillis();
         if ((Ttt - Long.parseLong(Tt) < 2000) && MAC.equals(XMAC) ) {
 
             //计算XRES 预期响应数据
-            System.out.println("三方认证第四步，校验完毕数据符合要求");
+            System.out.println("LEO-A校验数据");
             String XRES = ds.DESencode(R, CK);
             Writer writer = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
             writer.write(XRES);
             writer.write("eof\n");
             writer.flush();
 
-            System.out.println("三方认证第五步,A向B发送数据成功");
+            System.out.println("LEO-A向LEO-B发送信息："+XRES);
 
             writer.close();
             br.close();
