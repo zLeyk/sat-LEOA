@@ -91,7 +91,7 @@ public class LeoLeoAuthTask implements Runnable {
             if (s.split(",")[0].equals("3")){
 
                 System.out.println("Step5:");
-                System.out.println("LEO-B接收LEO-A信息："+s);
+                System.out.println("LEO-A接收LEO-B信息："+s);
 
                 /**
                  * Step4-1：LB 对认证请求中的密文信息进行解密，得到SSIDA、TIDA、RIDA、TIDB 、
@@ -99,21 +99,21 @@ public class LeoLeoAuthTask implements Runnable {
                  * 文身份信息 SSIDA + TIDA 与对方卫星所用的 SSIDA 以及 TCC 在密文中提供的
                  * TIDA相同，继续执行后续步骤；否者结束认证，释放连接。
                  */
-                String SSID_A = s.split(",")[1];
-                String TID_A = s.split(",")[2]+","+s.split(",")[3];
-                String E_B = s.split(",")[4];
-                String RE_B = ds.DESdecode(E_B,preleo.getCk());
+                String SSID_B = s.split(",")[1];
+                String TID_B = s.split(",")[2]+","+s.split(",")[3];
+                String E_A = s.split(",")[4];
+                String RE_A = ds.DESdecode(E_A,preleo.getCk());
                 //System.out.println(RE_B);
-                String SSID_A_EB = RE_B.split(",")[0];
-                String TID_A_EB = RE_B.split(",")[1]+","+RE_B.split(",")[2];
-                String ID_A_EB = RE_B.split(",")[3];
-                String TID_B_EB = RE_B.split(",")[4]+","+RE_B.split(",")[5];
-                String TT_EB = RE_B.split(",")[6];
-                Long tt = Long.parseLong(TT_EB);
+                String SSID_B_EA = RE_A.split(",")[0];
+                String TID_B_EA = RE_A.split(",")[1]+","+RE_A.split(",")[2];
+                String ID_B_EA = RE_A.split(",")[3];
+                String TID_A_EA = RE_A.split(",")[4]+","+RE_A.split(",")[5];
+                String TT_EA = RE_A.split(",")[6];
+                Long tt = Long.parseLong(TT_EA);
                 //当前时间
                 Long ct = System.currentTimeMillis();
 
-                if((ct-tt)<2000 && SSID_A.equals(SSID_A_EB) && TID_A.equals(TID_A_EB)){
+                if((ct-tt)<2000 && SSID_B.equals(SSID_B_EA) && TID_B.equals(TID_B_EA)){
 
                     /**
                      * Step4-2： 获得随机数，通过主密钥加密（随机数，时间戳，B临时身份）获得MAC，
@@ -129,7 +129,7 @@ public class LeoLeoAuthTask implements Runnable {
 
                     System.out.println("获得随机数："+R);
                     //生成Mac校验码
-                    String MAC = ds.DESencode( R + Long.toString(ct) + TID_B_EB,preleo.getMainKey());
+                    String MAC = ds.DESencode( R + Long.toString(ct) + TID_A_EA,preleo.getMainKey());
                     System.out.println("获得校验码："+MAC);
                     //生成合成令牌
                     String Token =R +","+ Long.toString(ct) +","+ preleo.getSsid().toString()+","+ MAC;
@@ -142,7 +142,7 @@ public class LeoLeoAuthTask implements Runnable {
                     //计算XRES 预期响应数据
                     String XRES = ds.DESencode(R,CK);
                     System.out.println("获得预期响应数据："+XRES);
-                    String newmsg = R +","+ TID_B_EB +","+ ds.DESencode(Token,CK);
+                    String newmsg = R +","+ TID_A_EA +","+ ds.DESencode(Token,CK);
 
 
                     //第四步最后调用子线程SanfanClientReadThread，这样可以重新写数据不会出现收到的数据乱码，将B要给A的数据传给子线程，第六步在子线程了
@@ -162,7 +162,7 @@ public class LeoLeoAuthTask implements Runnable {
                     writer2.write(newmsg);
                     writer2.write("eof\n");
                     writer2.flush();
-                    System.out.println("LEO-B向LEO-A发送信息："+newmsg);
+                    System.out.println("LEO-A向LEO-B发送信息："+newmsg);
                     StringBuilder sb2 = new StringBuilder();
                     String temp2;
                     int index2;
@@ -183,21 +183,21 @@ public class LeoLeoAuthTask implements Runnable {
                     }
                     String RES = sb2.toString();
                     System.out.println("Step7:");
-                    System.out.println("LEO-B接收LEO-A信息："+RES);
+                    System.out.println("LEO-A接收LEO-B信息："+RES);
                     if (RES.equals(XRES) ){
-                        System.out.println("LEO-B校验数据");
+                        System.out.println("LEO-A校验数据");
                         System.out.println("三方认证成功");
                         //三方认证成功可以插入数据了
-                        System.out.println("LEO-B向卫星认证表插入三方认证数据");
-                        int ID_A = Integer.valueOf(ID_A_EB);
-                        int ssid_A = Integer.valueOf(SSID_A);
+                        System.out.println("LEO-A向卫星认证表插入三方认证数据");
+                        int ID_B = Integer.valueOf(ID_B_EA);
+                        int ssid_B = Integer.valueOf(SSID_B);
                         try {
                             String sql = "insert into leoleo values(?,?,?,?,?,?) ";
                             PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
-                            pst.setInt(1, ID_A);
-                            pst.setInt(2, ssid_A);
-                            pst.setString(3, TID_A_EB);
-                            pst.setString(4, TID_B_EB);
+                            pst.setInt(1, ID_B);
+                            pst.setInt(2, ssid_B);
+                            pst.setString(3, TID_B_EA);
+                            pst.setString(4, TID_A_EA);
                             pst.setInt(5, 1);
                             pst.setString(6, Token);
                             pst.executeUpdate();//解释在下
@@ -244,23 +244,23 @@ public class LeoLeoAuthTask implements Runnable {
             else if(s.split(",")[0].equals("2")){
                 //二方认证 Step2 获得来自A的数据，根据时间戳，A临时身份，Token，比较，并将B自身数据发送给A
                 System.out.println("Step3:");
-                System.out.println("LEO-B接收LEO-A信息："+s);
+                System.out.println("LEO-A接收LEO-B信息："+s);
 
                 String T = s.split(",")[1];
-                String ID_A = s.split(",")[2];
-                String TID_A = s.split(",")[3]+ ","+s.split(",")[4];
+                String ID_B = s.split(",")[2];
+                String TID_B = s.split(",")[3]+ ","+s.split(",")[4];
                 String Token = s.split(",")[5]+ ","+s.split(",")[6]+ ","+s.split(",")[7]+ ","+s.split(",")[8];
                 //String TID_A = s.split(",")[2]+","+s.split(",")[3];
                 //String Token = s.split(",")[4]+","+s.split(",")[5]+","+s.split(",")[6]+","+s.split(",")[7];
                 // 查找自身认证表中的存的Idsat为A的那一行临时身份A和Token，以及临时身份B
-                String sql2 = "select * from leoleo where IDsat = "+ ID_A.toString();
+                String sql2 = "select * from leoleo where IDsat = "+ ID_B.toString();
                 ResultSet resultSet2 = null;
                 resultSet2 = statement.executeQuery(sql2);
                 while (resultSet2.next()) {
                     leoleoB.setIDsat(resultSet2.getInt(1));
                     leoleoB.setSsid(resultSet2.getString(2));
-                    leoleoB.setTida(resultSet2.getString(3));
-                    leoleoB.setTidb(resultSet2.getString(4));
+                    leoleoB.setTidb(resultSet2.getString(3));
+                    leoleoB.setTida(resultSet2.getString(4));
                     leoleoB.setSt(resultSet2.getInt(5));
                     leoleoB.setToken(resultSet2.getString(6));
 
@@ -274,11 +274,11 @@ public class LeoLeoAuthTask implements Runnable {
                 Long ct = System.currentTimeMillis();
                 //(ct-t)<2000 &&
 
-                if(  TID_A.equals(leoleoB.getTida()) && Token.equals(leoleoB.getToken())){
+                if(  TID_B.equals(leoleoB.getTidb()) && Token.equals(leoleoB.getToken())){
 
 
-                    String newmsg_A = leoleoB.getTidb() ;
-                    System.out.println("LEO-B校验数据");
+                    String newmsg_A = leoleoB.getTida() ;
+                    System.out.println("LEO-A校验数据");
                     //System.out.println(newmsg_A);
 //-------------------------------
   //                  调用子线程，这样可以重新写数据，将B临时身份发送给A,其他两方认证就在子线程里面完成啦，这个端口号实例化一个吧
@@ -299,7 +299,7 @@ public class LeoLeoAuthTask implements Runnable {
                     writer2.write(newmsg_A);
                     writer2.write("eof\n");
                     writer2.flush();
-                    System.out.println("LEO-B向LEO-A发送信息："+newmsg_A);
+                    System.out.println("LEO-A向LEO-B发送信息："+newmsg_A);
 
                     StringBuilder sb2 = new StringBuilder();
                     String temp2;
@@ -322,15 +322,15 @@ public class LeoLeoAuthTask implements Runnable {
                     String Res = sb2.toString();
                     if (Res.equals("YES")){
                         System.out.println("Step5:");
-                        System.out.println("LEO-B接收LEO-A数据：LEO-A端二次认证成功");
+                        System.out.println("LEO-A接收LEO-B数据：LEO-B端二次认证成功");
                         //改自身的数据
 
                         try {
                             //查询语句
-                            String sql3 = "UPDATE leoleo set ST = 1 WHERE IDsat = " + ID_A;;
+                            String sql3 = "UPDATE leoleo set ST = 1 WHERE IDsat = " + ID_B;;
                             //System.out.println(sqlleob);
                             boolean executeleob = statement.execute(sql3);
-                            System.out.println("二次认证成功，更改LEO-B认证表成功");
+                            System.out.println("二次认证成功，更改LEO-A认证表成功");
 
                             //resultSetleob.close();
                         } catch (SQLException e) {
