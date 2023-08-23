@@ -1,7 +1,7 @@
 package com.sat.satquery.mapper;
 
-import com.sat.satquery.entity.Pretcc;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.sat.satquery.entity.Pretcc;
 
 /**
  * <p>

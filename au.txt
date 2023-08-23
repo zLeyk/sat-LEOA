@@ -1,0 +1,14 @@
+Step1:
+临时身份:1692801045704,1
+LEO发送信息:0,zxYbPSVBpk/wZh2YrbWwhw==
+Step2:
+TCC验证临时身份
+TCC合成认证数据
+TCC发送信息:HtUhf5qT7DklgEOfe2PxEznjeQWCKXfMJVIJkCVzLEhW+z9HE/92bLVEDTZC7pWA
+Step3:
+LEO接收信息:HtUhf5qT7DklgEOfe2PxEznjeQWCKXfMJVIJkCVzLEhW+z9HE/92bLVEDTZC7pWA
+解密信息:1692801046170,4KNhvta4Gkj17nYw1HGg0Q==,39
+发送信息:HtUhf5qT7DkUOjaC3hW3m2Zp0tV9NUGA/SsofCuyW5Y=
+Step4:
+TCC校验数据
+认证成功

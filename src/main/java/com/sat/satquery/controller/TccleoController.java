@@ -2,13 +2,12 @@ package com.sat.satquery.controller;
 
 
 import com.sat.satquery.entity.Preleo;
-import com.sat.satquery.entity.Pretcc;
 import com.sat.satquery.entity.Tccleo;
 import com.sat.satquery.service.IPreleoService;
-import com.sat.satquery.service.IPretccService;
 import com.sat.satquery.service.ITccleoService;
 import com.sat.utils.LeoTccAuthTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -26,6 +25,7 @@ import java.util.List;
  * @author Archie
  * @since 2023-08-15
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/satquery/tccleo")
 public class TccleoController {
@@ -56,7 +56,7 @@ public class TccleoController {
             throw new RuntimeException(e);
         }
 
-        return t.getSt();
+        return t.getSt()+","+t.getLog();
     }
 
 }

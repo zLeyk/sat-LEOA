@@ -1,7 +1,7 @@
 package com.sat.satquery.service;
 
-import com.sat.satquery.entity.Pretcc;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sat.satquery.entity.Pretcc;
 
 /**
  * <p>

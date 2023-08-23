@@ -4,7 +4,6 @@ import com.sat.satquery.entity.Leoleo;
 import com.sat.satquery.entity.Preleo;
 
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.sql.*;
@@ -37,7 +36,8 @@ public class LEOTask implements Runnable {
         Leoleo leoleoB = new Leoleo();
         DESUtils ds = new DESUtils();
         //  注释是是查jdbc连接数据库查询数据表
-        String url = "jdbc:mysql://localhost:3306/leoa";
+        Class.forName("org.sqlite.JDBC");
+        String url = "jdbc:sqlite::resource:db/leoa.db";
         Connection connection = null;
         Statement statement = null;
         String sql = "";
@@ -88,7 +88,7 @@ public class LEOTask implements Runnable {
             //查询数据库表中的是否有SSID_B
             int exist;
             try {
-                connection = DriverManager.getConnection(url, "root", "123456");
+                connection = DriverManager.getConnection(url);
                 statement = connection.createStatement();
                 //sql = "select * from leoleo";
                 sql = "select * from leoleo where SSID = " + SSID_B.toString();
@@ -140,7 +140,7 @@ public class LEOTask implements Runnable {
                 // 传入Socket 和 卫星的预置信息(通过前面注解的JDBC查)和地面开始通信建立了一个新线程，查数据库
                 //查询地面端口和IP地面端口
                 Socket sockettcc = new Socket("127.0.0.1", 8899);
-                LeoLeoAuthTask leoLeoAuthTask = new LeoLeoAuthTask(sockettcc, preleo, SSID_B);
+                TccLeoLeoAuthTask leoLeoAuthTask = new TccLeoLeoAuthTask(sockettcc, preleo, SSID_B);
                 Thread thread = new Thread(leoLeoAuthTask);
                 thread.start();
                 thread.join();

@@ -1,14 +1,10 @@
 package com.sat.utils;
 
 import com.sat.satquery.entity.Preleo;
-import com.sat.satquery.service.IPreleoService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.util.List;
 
 //星地认证流程
 public class LeoTccAuthTask implements Runnable {
@@ -16,6 +12,7 @@ public class LeoTccAuthTask implements Runnable {
     private Socket client;
     private String st;
 
+    private String log;
 
     private Preleo preleo;
     public LeoTccAuthTask(Socket client, Preleo preleo) {
@@ -31,6 +28,14 @@ public class LeoTccAuthTask implements Runnable {
         this.st = st;
     }
 
+    public String getLog() {
+        return log;
+    }
+
+    public void setLog(String log) {
+        this.log = log;
+    }
+
     public void run() {
         try {
             handleSocket();
@@ -44,16 +49,18 @@ public class LeoTccAuthTask implements Runnable {
      * @throws Exception
      */
     private void handleSocket() throws Exception {
+        String pro = "";
         setSt("认证失败");
         //System.out.println(preleo);
         PrintStream out = System.out;
         // 先保存系统默认的打印输出流缓存
         //一定要先保存系统最初的打印输出，不然后面就改不回来了！！！
-        PrintStream ps = new PrintStream("D:\\项目\\星间控制KVM\\code\\LEOA\\src\\main\\resources\\static\\pages\\log.txt");
+        PrintStream ps = new PrintStream("log.txt");
         //可能会出现异常，直接throws就行了
         System.setOut(ps);
         BufferedWriter wr = new BufferedWriter(new FileWriter("au.txt"));
         DESUtils ds = new DESUtils();
+        MD5Utils md = new MD5Utils();
         //发送的消息  消息类型
         String msg = "0,";
         //Step1
@@ -66,12 +73,17 @@ public class LeoTccAuthTask implements Runnable {
         String Tid = t + "," + iDsat;
         msg = msg + ds.DESencode(Tid, preleo.getK());
         System.out.println("Step1:"+"<br/>");
+        pro = pro + "Step1:";
         wr.write("Step1:\n");
         System.out.println("临时身份:" + Tid+"<br/>");
+        pro = pro + "临时身份:"+Tid;
         wr.write("临时身份:" + Tid);
         wr.write("\n");
         System.out.println("LEO发送信息:" + msg+"<br/>");
         wr.write("LEO发送信息:" + msg+"\n");
+        pro = pro + "LEO发送信息:" + msg;
+
+
 
         Writer writer = null;
         BufferedReader br = null;
@@ -112,9 +124,14 @@ public class LeoTccAuthTask implements Runnable {
         System.out.println("TCC合成认证数据\n"+"<br/>");
         System.out.println("TCC发送信息:"+s+"\n"+"<br/>");
         System.out.println("Step3:"+"<br/>");
+        pro += "Step2:\n";
+        pro += "TCC验证临时身份\n";
+        pro += "TCC合成认证数据\n";
+        pro += "TCC发送信息:";
+        pro += "Step3:";
         //合成CK
         String CK;
-        String cks = new StringBuffer(MD5Utils.encrypt(preleo.getDkauth()+preleo.getDkenc())).reverse().toString();
+        String cks = new StringBuffer(md.encrypt(preleo.getDkauth()+preleo.getDkenc())).reverse().toString();
 
         if (cks.length()>=8){
             CK = cks.substring(0,8);
@@ -125,13 +142,17 @@ public class LeoTccAuthTask implements Runnable {
 
         //解密数据
         System.out.println("接收信息:"+s+"<br/>");
+        pro += "接收信息:"+s;
         wr.write("LEO接收信息:"+s+"\n");
         try {
             s = ds.DESdecode(s, CK);
             System.out.println("解密信息:" + s+"<br/>");
+            pro += "解密信息:" + s;
             wr.write("解密信息:" + s+"\n");
             if (s.split(",").length != 3) {
                 System.out.println("认证失败"+"<br/>");
+                pro += "认证失败";
+                setLog(pro);
                 wr.write("认证失败\n");
                 wr.close();
                 writer.close();
@@ -152,6 +173,8 @@ public class LeoTccAuthTask implements Runnable {
                 String XMAC = ds.DESencode(R+Tre, preleo.getWKenc());
                 if ((ct - Long.parseLong(Tre)) > 20000 || !(XMAC.equals(MAC))) {
                     System.out.println("校验不通过"+"<br/>");
+                    pro += "认证失败";
+                    setLog(pro);
                     wr.write("校验不通过\n");
                     writer.close();
                     br.close();
@@ -161,12 +184,12 @@ public class LeoTccAuthTask implements Runnable {
                     String req = ct + "," + Res;
                     req = ds.DESencode(req, CK);
                     System.out.println("发送信息:" + req+"<br/>");
+                    pro += "发送信息:" + req;
                     wr.write("发送信息:" + req);
                     wr.write("\n");
                     writer.write(req);
                     writer.write("eof\n");
                     writer.flush();
-                    Thread.sleep(2000);
                     //接受信息
                     sb.setLength(0);
                     while ((temp = br.readLine()) != null) {
@@ -179,12 +202,16 @@ public class LeoTccAuthTask implements Runnable {
                     wr.write("Step4:\n");
                     wr.write("TCC校验数据\n");
                     System.out.println("Step4:\n"+"<br/>");
+                    pro += "Step4:\n";
                     System.out.println("TCC校验数据\n"+"<br/>");
+                    pro += "TCC校验数据\n";
                     if (sb.toString().equals("认证成功")) {
                         System.out.println("认证成功"+"<br/>");
                         wr.write("认证成功\n");
                         ps.close();
                         setSt("认证成功");
+                        pro += "认证成功";
+                        setLog(pro);
                     }
 
                     wr.close();
@@ -195,6 +222,8 @@ public class LeoTccAuthTask implements Runnable {
             }
         }catch (Exception e){
             System.out.println("认证失败"+"<br/>");
+            pro += "认证失败";
+            setLog(pro);
             ps.close();
             wr.write("认证失败\n");
             wr.close();
