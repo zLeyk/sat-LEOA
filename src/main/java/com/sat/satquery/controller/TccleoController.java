@@ -2,10 +2,9 @@ package com.sat.satquery.controller;
 
 
 import com.sat.satquery.entity.Preleo;
-import com.sat.satquery.entity.Tccleo;
 import com.sat.satquery.service.IPreleoService;
-import com.sat.satquery.service.ITccleoService;
 import com.sat.utils.LeoTccAuthTask;
+import com.sat.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,19 +30,11 @@ import java.util.List;
 public class TccleoController {
 
     @Autowired
-    ITccleoService iTccleoService;
-
-    @Autowired
     IPreleoService iPreleoService;
-
-    @RequestMapping("/getAllTccLeoInfo")
-    public List<Tccleo> getAllTccLeoInfo() {
-        return iTccleoService.list();
-    }
 
 
     @GetMapping("/auth")
-    public String Auth() throws IOException {
+    public R Auth() throws IOException {
         Socket socket = new Socket("127.0.0.1",8899);
         List<Preleo> list = iPreleoService.list();
         LeoTccAuthTask t = new LeoTccAuthTask(socket,list.get(0));
@@ -55,8 +46,15 @@ public class TccleoController {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-        return t.getSt()+","+t.getLog();
+        R r = new R();
+        if (t.getSt() == "认证成功"){
+            r.setFlag(true);
+        }else {
+            r.setFlag(false);
+        }
+        r.setData(list.get(0));
+        r.setLog(t.getLog());
+        return r;
     }
 
 }

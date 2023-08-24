@@ -6,23 +6,38 @@ import lombok.Data;
 public class R {
     private Boolean flag;
     private Object data;
-    private Integer ans;
-    private  String msg;
-    public R(Boolean flag){
-        this.flag = flag;
-    }
-    public R(){}
-    public R(Boolean flag, Object data,Integer ans){
+    private String  log;
+
+    public R(Boolean flag, Object data, String log) {
         this.flag = flag;
         this.data = data;
-        this.ans = ans;
+        this.log = log;
     }
-    public R(Boolean flag, Object data){
+
+    public R() {
+    }
+
+    public Boolean getFlag() {
+        return flag;
+    }
+
+    public void setFlag(Boolean flag) {
         this.flag = flag;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
         this.data = data;
     }
-    public R(String msg){
-        this.flag = false;
-        this.msg = msg;
+
+    public String getLog() {
+        return log;
+    }
+
+    public void setLog(String log) {
+        this.log = log;
     }
 }

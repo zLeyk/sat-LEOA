@@ -65,16 +65,11 @@ public class LeoleoController {
         List<Preleo> list1 = iPreleoService.list();
                 try {
                     Socket socket = new Socket("127.0.0.1", 8898);
-
                     LeoLeoAuthTask t = new LeoLeoAuthTask(socket, true, list1.get(0));
                     new Thread(t).start();
-
-
                 } catch (Exception e) {
                     System.err.println("本卫星广播信息");
                 }
-
     }
-
 
 }

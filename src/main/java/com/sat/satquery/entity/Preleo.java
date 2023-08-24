@@ -23,7 +23,7 @@ package com.sat.satquery.entity;
     private static final long serialVersionUID = 1L;
 
             @TableId("IDsat")
-    private Integer IDsat;
+    private String IDsat;
 
         @TableField("SSID")
     private Integer ssid;
@@ -47,71 +47,5 @@ package com.sat.satquery.entity;
         @TableField("CK")
     private String ck;
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
-    }
 
-    public Integer getIDsat() {
-        return IDsat;
-    }
-
-    public void setIDsat(Integer IDsat) {
-        this.IDsat = IDsat;
-    }
-
-    public Integer getSsid() {
-        return ssid;
-    }
-
-    public void setSsid(Integer ssid) {
-        this.ssid = ssid;
-    }
-
-    public String getDkenc() {
-        return Dkenc;
-    }
-
-    public void setDkenc(String dkenc) {
-        Dkenc = dkenc;
-    }
-
-    public String getDkauth() {
-        return Dkauth;
-    }
-
-    public void setDkauth(String dkauth) {
-        Dkauth = dkauth;
-    }
-
-    public String getWKenc() {
-        return WKenc;
-    }
-
-    public void setWKenc(String WKenc) {
-        this.WKenc = WKenc;
-    }
-
-    public String getK() {
-        return k;
-    }
-
-    public void setK(String k) {
-        this.k = k;
-    }
-
-    public String getMainKey() {
-        return MainKey;
-    }
-
-    public void setMainKey(String mainKey) {
-        MainKey = mainKey;
-    }
-
-    public String getCk() {
-        return ck;
-    }
-
-    public void setCk(String ck) {
-        this.ck = ck;
-    }
 }

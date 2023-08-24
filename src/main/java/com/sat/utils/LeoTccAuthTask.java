@@ -68,10 +68,10 @@ public class LeoTccAuthTask implements Runnable {
         Long l = System.currentTimeMillis();
         String t = Long.toString(l);
         //临时身份
-        String iDsat = preleo.getIDsat().toString();
+        String iDsat = preleo.getIDsat();
         //临时身份
         String Tid = t + "," + iDsat;
-        msg = msg + ds.DESencode(Tid, preleo.getK());
+        msg = msg + ds.DESencode(Tid, preleo.getK())+","+preleo.getIDsat();
         System.out.println("Step1:"+"<br/>");
         pro = pro + "Step1:";
         wr.write("Step1:\n");
@@ -83,8 +83,6 @@ public class LeoTccAuthTask implements Runnable {
         wr.write("LEO发送信息:" + msg+"\n");
         pro = pro + "LEO发送信息:" + msg;
 
-
-
         Writer writer = null;
         BufferedReader br = null;
         writer = new OutputStreamWriter(client.getOutputStream(), "GBK");
@@ -93,7 +91,6 @@ public class LeoTccAuthTask implements Runnable {
         writer.flush();
         br = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"));
 
-        Thread.sleep(2000);
         // Step3
         //读取发送的信息
 
@@ -138,8 +135,6 @@ public class LeoTccAuthTask implements Runnable {
         }else {
             CK = cks+'a'*(8-cks.length());
         }
-
-
         //解密数据
         System.out.println("接收信息:"+s+"<br/>");
         pro += "接收信息:"+s;
@@ -230,7 +225,6 @@ public class LeoTccAuthTask implements Runnable {
         }
         System.setOut(out);
         ps.close();
-
     }
 }
 

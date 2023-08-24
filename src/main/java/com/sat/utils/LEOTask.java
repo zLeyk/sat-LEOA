@@ -96,8 +96,8 @@ public class LEOTask implements Runnable {
                 exist = 0;
                 while (resultSet2.next()) {
                     exist++;
-                    leoleoB.setIDsat(resultSet2.getInt(1));
-                    leoleoB.setSsid(resultSet2.getString(2));
+                    leoleoB.setIDsat(resultSet2.getString(1));
+                    leoleoB.setSsid(resultSet2.getInt(2));
                     leoleoB.setTida(resultSet2.getString(3));
                     leoleoB.setTidb(resultSet2.getString(4));
                     leoleoB.setSt(resultSet2.getInt(5));
@@ -116,7 +116,7 @@ public class LEOTask implements Runnable {
             ResultSet resultSet = null;
             resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
-                preleo.setIDsat(resultSet.getInt(1));
+                preleo.setIDsat(resultSet.getString(1));
                 //Integer ID_A = preleo.getIDsat();
                 preleo.setSsid(resultSet.getInt(2));
                 preleo.setDkenc(resultSet.getString(3));

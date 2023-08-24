@@ -257,8 +257,8 @@ public class LeoLeoAuthTask implements Runnable {
                 ResultSet resultSet2 = null;
                 resultSet2 = statement.executeQuery(sql2);
                 while (resultSet2.next()) {
-                    leoleoB.setIDsat(resultSet2.getInt(1));
-                    leoleoB.setSsid(resultSet2.getString(2));
+                    leoleoB.setIDsat(resultSet2.getString(1));
+                    leoleoB.setSsid(resultSet2.getInt(2));
                     leoleoB.setTidb(resultSet2.getString(3));
                     leoleoB.setTida(resultSet2.getString(4));
                     leoleoB.setSt(resultSet2.getInt(5));
