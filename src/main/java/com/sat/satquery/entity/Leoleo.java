@@ -1,11 +1,12 @@
 package com.sat.satquery.entity;
 
-    import com.baomidou.mybatisplus.annotation.TableId;
-    import com.baomidou.mybatisplus.annotation.TableField;
-    import java.io.Serializable;
-    import lombok.Data;
-    import lombok.EqualsAndHashCode;
-    import lombok.experimental.Accessors;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
 
 /**
 * <p>
@@ -28,16 +29,19 @@ package com.sat.satquery.entity;
         @TableField("SSID")
     private Integer ssid;
 
-        @TableField("Tida")
-    private String Tida;
+        @TableField("TidSrc")
+    private String TidSrc;
 
-        @TableField("Tidb")
-    private String Tidb;
+        @TableField("TidDst")
+    private String TidDst;
 
         @TableField("ST")
     private Integer st;
 
         @TableField("Token")
     private String Token;
+
+    @TableField("log")
+    private String log;
 
 }

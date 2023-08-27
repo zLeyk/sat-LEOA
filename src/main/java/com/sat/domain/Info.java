@@ -1,38 +1,31 @@
-//package com.sat.domain;
-//
-//import lombok.Data;
-//
-//@Data
-//public class Info {
-//    private String ip;
-//    private String port;
-//
-//    public Info(String ip, String port) {
-//        this.ip = ip;
-//        this.port = port;
-//    }
-//
-//    public String getIp() {
-//        return ip;
-//    }
-//
-//    public void setIp(String ip) {
-//        this.ip = ip;
-//    }
-//
-//    public String getPort() {
-//        return port;
-//    }
-//
-//    public void setPort(String port) {
-//        this.port = port;
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return "Info{" +
-//                "ip='" + ip + '\'' +
-//                ", port='" + port + '\'' +
-//                '}';
-//    }
-//}
+package com.sat.domain;
+
+import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+
+/**
+* <p>
+    * 
+    * </p>
+*
+* @author Archie
+* @since 2023-08-15
+*/
+    @Data
+        @EqualsAndHashCode(callSuper = false)
+    @Accessors(chain = true)
+    public class Info implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    @TableId("IDsat")
+    private String IDsat;
+    private String ip;
+
+    private Integer port;
+
+
+}

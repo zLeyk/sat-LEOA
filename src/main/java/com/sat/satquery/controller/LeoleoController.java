@@ -3,6 +3,7 @@ package com.sat.satquery.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.sat.domain.Info;
 import com.sat.satquery.entity.Leoleo;
 import com.sat.satquery.entity.Preleo;
 import com.sat.satquery.service.ILeoleoService;
@@ -11,8 +12,10 @@ import com.sat.utils.LeoLeoAuthTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.sound.sampled.Line;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,17 +62,25 @@ public class LeoleoController {
     }
 
     //星地认证
-    @GetMapping("/broadcast")
-    public void broadcastInfo() {
+    @PostMapping("/leoAu")
+    public ArrayList<Leoleo> broadcastInfo(@RequestBody ArrayList<Info> list)throws Exception {
         //调用Serice查询B的因为后面需要预置信息
         List<Preleo> list1 = iPreleoService.list();
-                try {
-                    Socket socket = new Socket("127.0.0.1", 8898);
-                    LeoLeoAuthTask t = new LeoLeoAuthTask(socket, true, list1.get(0));
-                    new Thread(t).start();
-                } catch (Exception e) {
-                    System.err.println("本卫星广播信息");
-                }
+
+        for(Info info: list) {
+            Socket socket = new Socket(info.getIp(), info.getPort());
+            LeoLeoAuthTask t = new LeoLeoAuthTask(socket,info.getIDsat(),list1.get(0));
+            new Thread(t).start();
+        }
+        Thread.sleep(5000);
+        List<Leoleo> result = iLeoleoService.list();
+        ArrayList<Leoleo> re = new ArrayList<>();
+        for (Leoleo le:
+             result) {
+            re.add(le);
+        }
+        System.out.println(re);
+        return re;
     }
 
 }
