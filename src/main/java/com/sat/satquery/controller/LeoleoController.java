@@ -61,18 +61,19 @@ public class LeoleoController {
         return iLeoleoService.updateById(newInfo);
     }
 
-    //星地认证
+    //星间认证方法
     @PostMapping("/leoAu")
     public ArrayList<Leoleo> broadcastInfo(@RequestBody ArrayList<Info> list)throws Exception {
         //调用Serice查询B的因为后面需要预置信息
         List<Preleo> list1 = iPreleoService.list();
-
+        //遍历所有与A相连的卫星
         for(Info info: list) {
             Socket socket = new Socket(info.getIp(), info.getPort());
             LeoLeoAuthTask t = new LeoLeoAuthTask(socket,info.getIDsat(),list1.get(0));
             new Thread(t).start();
         }
         Thread.sleep(5000);
+        //查询认证过程插入的星间认证信息 ，并返回List
         List<Leoleo> result = iLeoleoService.list();
         ArrayList<Leoleo> re = new ArrayList<>();
         for (Leoleo le:

@@ -57,7 +57,7 @@ public class LeoLeoAuthTask implements Runnable {
 //        boolean r1 = statement.execute(sql);
         sql = "select * from leoleo where IDsat = '" + DstIDsat+"'";
         resultSet1  = statement.executeQuery(sql);
-        boolean f = true;  // 源卫星是否存在和目的微信的记录
+        boolean f = true;  // 源卫星是否存在和目的卫星的记录  存在(true)    防止后面主键重复报错
         if(!resultSet1.next()){
             f = false;
         }
@@ -70,7 +70,7 @@ public class LeoLeoAuthTask implements Runnable {
             e.printStackTrace();
         }
 
-        msg = preleo.getSsid().toString();
+        msg = preleo.getSsid().toString();   //源卫星的SSID  发送信息
         System.out.println("Step1:");
         log = "Step1:\n";
         System.out.println("卫星"+SrcIDsat+"向卫星"+DstIDsat+"发起星间认证，发送自身广播编号:"+msg);
@@ -126,10 +126,10 @@ public class LeoLeoAuthTask implements Runnable {
         //设置超时间为10秒
 
         String s = sb.toString();
-        if(s.equals("")){
+        if(s.equals("")){    //没有接收到信息，可能的情况(1.三方认证目的卫星和地面卫星通信失败;2.)
             log += "认证失败\n";
             try {
-                if (!f){
+                if (!f){    //之前不存在 就插入  存在就更新
                     sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                     PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
                     pst.setString(1, DstIDsat);
