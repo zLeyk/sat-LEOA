@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.jnlp.ClipboardService;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
@@ -37,7 +38,6 @@ public class TccleoController {
 
     @GetMapping("/auth")
     public String Auth() throws IOException {
-        System.out.println("sss");
         String r = "";
         Socket socket = new Socket("127.0.0.1",8899);
         List<Preleo> list = iPreleoService.list();
@@ -48,7 +48,6 @@ public class TccleoController {
         try {
             th.join();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
         if (t.getSt() == "身份密钥错误"){
             r = "身份密钥错误";
