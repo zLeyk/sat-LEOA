@@ -69,6 +69,7 @@ public class TccLeoLeoAuthTask implements Runnable {
         try {
             msg = ds.DESencode(msg,preleo.getK());
         } catch (Exception e) {
+
         }
         System.out.println("加密信息:"+msg);
         msg ="1," + msg ;

@@ -29,12 +29,16 @@ import java.util.List;
 @RequestMapping("/satquery/tccleo")
 public class TccleoController {
 
+
+
     @Autowired
     IPreleoService iPreleoService;
 
 
     @GetMapping("/auth")
-    public R Auth() throws IOException {
+    public String Auth() throws IOException {
+        System.out.println("sss");
+        String r = "";
         Socket socket = new Socket("127.0.0.1",8899);
         List<Preleo> list = iPreleoService.list();
         LeoTccAuthTask t = new LeoTccAuthTask(socket,list.get(0));
@@ -46,14 +50,9 @@ public class TccleoController {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        R r = new R();
-        if (t.getSt() == "认证成功"){
-            r.setFlag(true);
-        }else {
-            r.setFlag(false);
+        if (t.getSt() == "身份密钥错误"){
+            r = "身份密钥错误";
         }
-        r.setData(list.get(0));
-        r.setLog(t.getLog());
         return r;
     }
 

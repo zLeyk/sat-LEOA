@@ -12,7 +12,7 @@ public class LeoTccAuthTask implements Runnable {
     private Socket client;
     private String st;
 
-    private String log;
+//    private String log;
 
     private Preleo preleo;
     public LeoTccAuthTask(Socket client, Preleo preleo) {
@@ -28,13 +28,6 @@ public class LeoTccAuthTask implements Runnable {
         this.st = st;
     }
 
-    public String getLog() {
-        return log;
-    }
-
-    public void setLog(String log) {
-        this.log = log;
-    }
 
     public void run() {
         try {
@@ -49,7 +42,6 @@ public class LeoTccAuthTask implements Runnable {
      * @throws Exception
      */
     private void handleSocket(){
-        String pro = "";
         setSt("认证失败");
         //System.out.println(preleo);
 //        PrintStream out = System.out;
@@ -74,21 +66,16 @@ public class LeoTccAuthTask implements Runnable {
         try {
             msg = msg + ds.DESencode(Tid, preleo.getK())+","+preleo.getIDsat();   //  密钥长度不符合 不考虑
         } catch (Exception e) {
+            setSt("身份密钥错误");
+            try {
+                client.close();
+            } catch (IOException ex) {
+            }
         }
-//        System.out.println("Step1:"+"<br/>");
-//        pro = pro + "Step1:";
-//        wr.write("Step1:\n");
-//        System.out.println("临时身份:" + Tid+"<br/>");
-//        pro = pro + "临时身份:"+Tid;
-//        wr.write("临时身份:" + Tid);
-//        wr.write("\n");
-//        System.out.println("LEO发送信息:" + msg + "<br/>");
-//        wr.write("LEO发送信息:" + msg+"\n");
-//        pro = pro + "LEO发送信息:" + msg;
+
 
         Writer writer = null;
         BufferedReader br = null;
-
         try {
             writer = new OutputStreamWriter(client.getOutputStream(), "GBK");
             writer.write(msg);
@@ -97,6 +84,9 @@ public class LeoTccAuthTask implements Runnable {
         } catch (IOException e) {
 
         }
+
+
+
 
         try {
             br = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"));
@@ -262,16 +252,6 @@ public class LeoTccAuthTask implements Runnable {
         }else {
             System.out.println("没有收到地面的信息，认证失败");
         }
-//        }catch (Exception e){
-//            System.out.println("认证失败"+"<br/>");
-//            pro += "认证失败";
-//            setLog(pro);
-//            ps.close();
-//            wr.write("认证失败\n");
-//            wr.close();
-//        }
-//        System.setOut(out);
-//        ps.close();
     }
 }
 

@@ -305,7 +305,8 @@ public class LeoLeoAuthTask implements Runnable {
                                 pst.executeUpdate();
                             } else {
                                 sql = "UPDATE leoleo set ST = 0 , log = '" + log + "' WHERE IDsat = '" + DstIDsat + "'";
-                                boolean executeleo = statement.execute(sql);
+                                int executeleo = statement.executeUpdate(sql);
+                                statement.close();
                             }
 
                         } catch (SQLException ee) {
@@ -334,6 +335,7 @@ public class LeoLeoAuthTask implements Runnable {
                         if(f){
                             sql = "delete from leoleo where IDsat='" +ID_Dst+"'";
                             statement.execute(sql);
+                            statement.close();
                         }
                         try {
                             sql = "insert into leoleo values(?,?,?,?,?,?,?) ";
@@ -346,6 +348,7 @@ public class LeoLeoAuthTask implements Runnable {
                             pst.setString(6, Token);
                             pst.setString(7, log);
                             pst.executeUpdate();//解释在下
+                            pst.close();
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
@@ -361,7 +364,6 @@ public class LeoLeoAuthTask implements Runnable {
                             writer.close();
                             reader.close();
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
                         }
 
                     } else {
@@ -374,9 +376,11 @@ public class LeoLeoAuthTask implements Runnable {
                                 pst.setInt(2, 0);
                                 pst.setString(3, log);
                                 pst.executeUpdate();
+                                pst.close();
                             } else {
                                 sql = "UPDATE leoleo set ST = 0 , log = '" + log + "' WHERE IDsat = '" + DstIDsat + "'";
-                                boolean executeleo = statement.execute(sql);
+                                int executeleo = statement.executeUpdate(sql);
+                                statement.close();
                             }
 
                         } catch (SQLException ee) {
@@ -412,6 +416,7 @@ public class LeoLeoAuthTask implements Runnable {
                         pst.setInt(1, 0);
                         pst.setString(2, log);
                         pst.executeUpdate();//解释在下
+                        pst.close();
                     } catch (SQLException ee) {
                         ee.printStackTrace();
                     }
@@ -502,8 +507,8 @@ public class LeoLeoAuthTask implements Runnable {
                             try {
                                 //查询语句
                                 sql = "UPDATE leoleo set ST = 1 , log = '" + log + "'" + "WHERE IDsat = '" + ID_Dst + "'";
-                                boolean executeleo = statement.execute(sql);
-
+                                int executeleo = statement.executeUpdate(sql);
+                                statement.close();
                             } catch (SQLException e) {
                                 e.printStackTrace();
                             }
@@ -518,9 +523,11 @@ public class LeoLeoAuthTask implements Runnable {
                                     pst.setInt(2, 0);
                                     pst.setString(3, log);
                                     pst.executeUpdate();
+                                    pst.close();
                                 } else {
                                     sql = "UPDATE leoleo set ST = 0 , log = '" + log + "' WHERE IDsat = '" + DstIDsat + "'";
-                                    boolean executeleo = statement.execute(sql);
+                                    int executeleo = statement.executeUpdate(sql);
+                                    statement.close();
                                 }
 
                             } catch (SQLException ee) {
@@ -539,7 +546,8 @@ public class LeoLeoAuthTask implements Runnable {
                         try {
                             //查询语句
                             sql = "UPDATE leoleo set ST = 0, log = '" + log + "' WHERE IDsat = '" + ID_Dst + "'";
-                            boolean executeleo = statement.execute(sql);
+                            int executeleo = statement.executeUpdate(sql);
+                            statement.close();
                         } catch (SQLException e) {
 
                         }
@@ -563,9 +571,11 @@ public class LeoLeoAuthTask implements Runnable {
                         pst.setInt(2, 0);
                         pst.setString(3, log);
                         pst.executeUpdate();
+                        pst.close();
                     } else {
                         sql = "UPDATE leoleo set ST = 0 , log = '" + log + "' WHERE IDsat = '" + DstIDsat + "'";
-                        boolean executeleo = statement.execute(sql);
+                        int executeleo = statement.executeUpdate(sql);
+                        statement.close();
                     }
                 }
             }
