@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.sound.sampled.Line;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * <p>
@@ -63,16 +65,47 @@ public class LeoleoController {
 
     //星间认证方法
     @PostMapping("/leoAu")
-    public ArrayList<Leoleo> broadcastInfo(@RequestBody ArrayList<Info> list)throws Exception {
+    public ArrayList<Leoleo> broadcastInfo(@RequestBody ArrayList<Info> list) {
         //调用Serice查询B的因为后面需要预置信息
         List<Preleo> list1 = iPreleoService.list();
         //遍历所有与A相连的卫星
+        int cnt = list.size();
+        CountDownLatch latch = new CountDownLatch(cnt);
+        System.out.println(list);
         for(Info info: list) {
-            Socket socket = new Socket(info.getIp(), info.getPort());
-            LeoLeoAuthTask t = new LeoLeoAuthTask(socket,info.getIDsat(),list1.get(0));
-            new Thread(t).start();
+            boolean flag = true;
+            Socket socket = null;
+            try {
+                System.out.println("Port:"+info.getPort());
+//                socket = new Socket(info.getIp(), info.getPort());
+                socket = new Socket("127.0.0.1", info.getPort());
+            } catch (Exception e) {
+                flag = false;
+                System.out.println("目标主机未开启");
+                String iDsat = info.getIDsat();   //之前是否存在认证状态 存在就删除，不存在
+                Leoleo leoleo = iLeoleoService.getById(iDsat);
+                Leoleo leoleoa = new Leoleo();
+                leoleoa.setSt(3);//设置状态 为3
+                leoleoa.setIDsat(iDsat);
+                leoleoa.setLog("目标主机未开启\n认证失败");
+                if(leoleo!=null){
+                    iLeoleoService.removeById(iDsat);
+                }
+                iLeoleoService.save(leoleoa);
+                latch.countDown();
+            }
+            if(flag) {
+                LeoLeoAuthTask t = new LeoLeoAuthTask(socket, info.getIDsat(), list1.get(0), latch);
+                new Thread(t).start();
+            }
         }
-        Thread.sleep(5000);
+        try {
+            latch.await();  //
+        } catch (InterruptedException e) {
+
+        }
+
+
         //查询认证过程插入的星间认证信息 ，并返回List
         List<Leoleo> result = iLeoleoService.list();
         ArrayList<Leoleo> re = new ArrayList<>();

@@ -2,9 +2,11 @@ package com.sat.utils;
 
 import com.sat.satquery.entity.Preleo;
 
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.NoSuchAlgorithmException;
 
 //星地认证流程
 public class LeoTccAuthTask implements Runnable {
@@ -43,14 +45,7 @@ public class LeoTccAuthTask implements Runnable {
      */
     private void handleSocket(){
         setSt("认证失败");
-        //System.out.println(preleo);
-//        PrintStream out = System.out;
-        // 先保存系统默认的打印输出流缓存
-        //一定要先保存系统最初的打印输出，不然后面就改不回来了！！！
-//        PrintStream ps = new PrintStream("log.txt");
-        //可能会出现异常，直接throws就行了
-//        System.setOut(ps);
-//        BufferedWriter wr = new BufferedWriter(new FileWriter("au.txt"));
+
         DESUtils ds = new DESUtils();
         MD5Utils md = new MD5Utils();
         //发送的消息  消息类型
@@ -66,13 +61,14 @@ public class LeoTccAuthTask implements Runnable {
         try {
             msg = msg + ds.DESencode(Tid, preleo.getK())+","+preleo.getIDsat();   //  密钥长度不符合 不考虑
         } catch (Exception e) {
+            System.out.println("密钥错误");
             setSt("身份密钥错误");
             try {
                 client.close();
             } catch (IOException ex) {
+
             }
         }
-
 
         Writer writer = null;
         BufferedReader br = null;
@@ -84,8 +80,6 @@ public class LeoTccAuthTask implements Runnable {
         } catch (IOException e) {
 
         }
-
-
 
 
         try {
@@ -193,59 +187,59 @@ public class LeoTccAuthTask implements Runnable {
                 } catch (Exception e) {
                     System.out.println("解密失败，工作密钥不正确");
                 }
-                if ((ct - Long.parseLong(Tre)) > 20000 || !(XMAC.equals(MAC))) {
+                if (!XMAC.equals("")) {
+                    if ((ct - Long.parseLong(Tre)) > 20000 || !(XMAC.equals(MAC))) {
 //                    System.out.println("校验不通过" + "<br/>");
 //                    pro += "认证失败";
 //                    setLog(pro);
 //                    wr.write("校验不通过\n");
-                    System.out.println("时间不符合新鲜性要求，或者消息校验码不正确");
-                    try {
-                        writer.close();
-                        br.close();
-                        client.close();
-                    } catch (IOException e) {
+                        System.out.println("时间不符合新鲜性要求，或者消息校验码不正确");
+                        try {
+                            writer.close();
+                            br.close();
+                            client.close();
+                        } catch (IOException e) {
 
-                    }
-                } else {
-                    String Res = null;
-                    try {
-                        Res = ds.DESencode(R, CK);   //计算响应数据
-                    } catch (Exception e) {
+                        }
+                    } else {
+                        String Res = null;
+                        try {
+                            Res = ds.DESencode(R, CK);   //计算响应数据
+                        } catch (Exception e) {
 
-                    }
-                    String req = ct + "," + Res;
-                    try {
-                        req = ds.DESencode(req, CK);  // 生成  新的请求
-                    } catch (Exception e) {
-                        System.out.println("会话密钥不正确");
-                    }
+                        }
+                        String req = ct + "," + Res;
+                        try {
+                            req = ds.DESencode(req, CK);  // 生成  新的请求
+                        } catch (Exception e) {
+                            System.out.println("会话密钥不正确");
+                        }
 //                    System.out.println("发送信息:" + req + "<br/>");
 //                    pro += "发送信息:" + req;
 //                    wr.write("发送信息:" + req);
 //                    wr.write("\n");
 
-                    try {
-                        writer.write(req);
-                        writer.write("eof\n");
-                        writer.flush();
-                    } catch (IOException e) {
+                        try {
+                            writer.write(req);
+                            writer.write("eof\n");
+                            writer.flush();
+                        } catch (IOException e) {
 
-                    }
+                        }
 
 
-
-                    //接受信息
+                        //接受信息
 //                    sb.setLength(0);
 
 
-
 //                    wr.close();
-                    try {
-                        writer.close();
-                        br.close();
-                        client.close();
-                    } catch (IOException e) {
+                        try {
+                            writer.close();
+                            br.close();
+                            client.close();
+                        } catch (IOException e) {
 
+                        }
                     }
                 }
             }
@@ -253,5 +247,7 @@ public class LeoTccAuthTask implements Runnable {
             System.out.println("没有收到地面的信息，认证失败");
         }
     }
+
 }
+
 

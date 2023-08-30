@@ -1,19 +1,36 @@
 package com.sat.utils;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 
 //DES类
 public class DESUtils {
-    public  String DESencode(String input, String key) throws Exception {
+    public  String DESencode(String input, String key) throws NoSuchPaddingException, NoSuchAlgorithmException {
         String transformation = "DES";
         String algorithm = "DES";
-        Cipher cipher = Cipher.getInstance(transformation);
+        Cipher cipher = null;
+        cipher = Cipher.getInstance(transformation);
         SecretKeySpec spec = new SecretKeySpec(key.getBytes(), algorithm);
-        cipher.init(1, spec);
-        byte[] bytes = cipher.doFinal(input.getBytes());
+        try {
+            cipher.init(1, spec);
+        } catch (InvalidKeyException e) {
+            return "0";
+        }
+        byte[] bytes = new byte[0];
+        try {
+            bytes = cipher.doFinal(input.getBytes());
+        } catch (IllegalBlockSizeException e) {
+            return "0";
+        } catch (BadPaddingException e) {
+            return "0";
+        }
         String encode = Base64.getEncoder().encodeToString(bytes);
         return encode;
     }

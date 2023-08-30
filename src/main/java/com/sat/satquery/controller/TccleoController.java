@@ -51,6 +51,8 @@ public class TccleoController {
         }
         if (t.getSt() == "身份密钥错误"){
             r = "身份密钥错误";
+        }else {
+            r = "a";  //防止tcc端读取为空报错
         }
         return r;
     }

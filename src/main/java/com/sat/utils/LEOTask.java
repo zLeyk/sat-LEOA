@@ -119,7 +119,6 @@ public class LEOTask implements Runnable {
         //没有查到SRC的信息
         if (exist == 0) {
             //如果三方认证
-
             TccLeoLeoAuthTask leoLeoAuthTask = null;
             Socket sockettcc = null;
             Thread thread = null;
@@ -144,12 +143,10 @@ public class LEOTask implements Runnable {
             String tccmsg = leoLeoAuthTask.getData();
             //如果和地面通信失败  关闭   和地面通信 Leo发送信息 Tcc接收信息 在TccLeoLeoAuthTask处理 接收的信息 在这个类处理
             // 如果前两步出现错误，tccmsg的log里面会出现认证失败，tccmsg包括返回信息和认证流程，如果认证失败 只存在认证流程
-            System.out.println("tccmsg:"+tccmsg);
             if(tccmsg.contains("失败")){
                 try {
                     socket.close();
                 } catch (IOException e) {
-
                 }
             } // 地面通信成功  并返回接收的信息
             else {
@@ -161,126 +158,67 @@ public class LEOTask implements Runnable {
                 try {
                     E_Dst = ds.DESdecode(tccmsg.split(",")[0], preleo.getCk());
                 } catch (Exception e) {
-                }
-                //解密和TCC通信获得的信息
-                if (E_Dst.split(",").length != 7) {
                     try {
                         socket.close();
-                    } catch (IOException e) {
-
+                    } catch (IOException ee) {
                     }
-                } else {   //  解密信息
-                    System.out.println("LEO-B解密信息：" + E_Dst);
-                    String TID_Dst = E_Dst.split(",")[0] + "," + E_Dst.split(",")[1];
-                    String ID_Src = E_Dst.split(",")[2];
-                    String TID_Src = E_Dst.split(",")[3] + "," + E_Dst.split(",")[4];
-                    String T = E_Dst.split(",")[5];
-                    String E_Src = E_Dst.split(",")[6];
-                    //验证时间戳新鲜
-                    Long tt = Long.parseLong(T);
-                    //当前时间
-                    Long ct = System.currentTimeMillis();
-                    //地面返回的信息 时间戳太大
-                    if ((ct - tt) > 2000) {
-                        System.out.println("认证失败");
-                        statement.close();
-                        connection.close();
+                }
+                if(E_Dst!=null && !E_Dst.equals("")) {   //防止预置卫星的CK不足8位 报错
+                    //解密和TCC通信获得的信息
+                    if (E_Dst.split(",").length != 7) {
                         try {
-                            reader.close();
                             socket.close();
                         } catch (IOException e) {
-
                         }
-                        //和源卫星继续认证 发送一个新的请求信息
-                    } else {
-                        String msg_Src = null;
-                        try {
-                            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(),"GBK"));
-                            //生成新的请求
-                            msg_Src = "3," + preleo.getSsid().toString() + "," + TID_Dst + "," + E_Src;
-                            //将信息发送给B
-                            writer.write(msg_Src);
-                            writer.write("eof\n");
-                            writer.flush();
-                        }catch (Exception e){
-                        }
-                        System.out.println("目的卫星向源卫星发送信息:" + msg_Src);
-                        //
-
-                        //Step4
-                        System.out.println("Step6:");
-                        //设置超时间为10秒
-                        try {
-                            socket.setSoTimeout(10 * 1000);
-                        } catch (SocketException e) {
-                            throw new RuntimeException(e);
-                        }
-                        sb.setLength(0);
-                        try {
-
-
-                            while ((temp = reader.readLine()) != null) {
-                                if ((index = temp.indexOf("eof")) != -1) {
-                                    sb.append(temp.substring(0, index));
-                                    break;
-                                }
-                                sb.append(temp);
-                            }
-                        }catch (Exception e){
-
-                        }
-                        //收到源卫星的信息
-                        String msgsrc = sb.toString();
-                        String R = msgsrc.split(",")[0];
-                        String TID_Src2 = msgsrc.split(",")[1] + "," + msgsrc.split(",")[2];
-
-                        //计算CK会话密钥,注意因为加密原因必须8位，CK取前8位置,和B中过程一样的目的就是得到和B一样的CK
-                        String C_K = null;
-                        try {
-                            C_K = ds.DESencode(R, preleo.getMainKey());
-                        } catch (Exception e) {
-
-                        }
-                        //System.out.println(C_K);
-                        String CK = C_K.substring(0, 8);
-                        //System.out.println(CK);
-
-                        //利用CK进行解密Token获得时间戳和校验码，比较时间戳和校验码是否一致
-                        String Token = null;
-                        try {
-                            Token = ds.DESdecode(msgsrc.split(",")[3], CK);
-                        } catch (Exception e) {
-                        }
-                        //System.out.println(Token);
-                        String Tt = Token.split(",")[1];
-                        String MAC = Token.split(",")[3];
-
-                        //计算MAC
-                        String XMAC = null;
-                        try {
-                            XMAC = ds.DESencode(R + Tt + TID_Src, preleo.getMainKey());
-                        } catch (Exception e) {
-                        }
-                        System.out.println("获得校验码:" + XMAC);
-                        long Ttt = System.currentTimeMillis();
-                        if ((Ttt - Long.parseLong(Tt) < 2000) && MAC.equals(XMAC)) {
-                            //计算XRES 预期响应数据
-                            System.out.println("LEO-B校验数据");
-                            String RES = null;
+                    } else {   //  解密信息
+                        System.out.println("LEO-B解密信息：" + E_Dst);
+                        String TID_Dst = E_Dst.split(",")[0] + "," + E_Dst.split(",")[1];
+                        String ID_Src = E_Dst.split(",")[2];
+                        String TID_Src = E_Dst.split(",")[3] + "," + E_Dst.split(",")[4];
+                        String T = E_Dst.split(",")[5];
+                        String E_Src = E_Dst.split(",")[6];
+                        //验证时间戳新鲜
+                        Long tt = Long.parseLong(T);
+                        //当前时间
+                        Long ct = System.currentTimeMillis();
+                        //地面返回的信息 时间戳太大
+                        if ((ct - tt) > 2000) {
+                            System.out.println("认证失败");
+                            statement.close();
+                            connection.close();
                             try {
-                                RES = ds.DESencode(R, CK);
-                                writer.write(RES);
+                                reader.close();
+                                socket.close();
+                            } catch (IOException e) {
+                            }
+                            //和源卫星继续认证 发送一个新的请求信息
+                        } else {
+                            String msg_Src = null;
+                            try {
+                                writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "GBK"));
+                                //生成新的请求
+                                msg_Src = "3," + preleo.getSsid().toString() + "," + TID_Dst + "," + E_Src;
+                                //将信息发送给B
+                                writer.write(msg_Src);
                                 writer.write("eof\n");
                                 writer.flush();
                             } catch (Exception e) {
                             }
+                            System.out.println("目的卫星向源卫星发送信息:" + msg_Src);
+                            //
 
-                            System.out.println("LEO-B向LEO-A发送信息:" + RES);
-
-                            sb.setLength(0);
+                            //Step4
+                            System.out.println("Step6:");
                             //设置超时间为10秒
                             try {
                                 socket.setSoTimeout(10 * 1000);
+                            } catch (SocketException e) {
+                            }
+
+
+
+                            sb.setLength(0);
+                            try {
                                 while ((temp = reader.readLine()) != null) {
                                     if ((index = temp.indexOf("eof")) != -1) {
                                         sb.append(temp.substring(0, index));
@@ -288,57 +226,176 @@ public class LEOTask implements Runnable {
                                     }
                                     sb.append(temp);
                                 }
-                            } catch (SocketException e) {
-                            } catch (IOException e) {
+                            } catch (Exception e) {
+
                             }
+                            //收到源卫星的信息
+                            String msgsrc = sb.toString();
 
+                            if (msgsrc!=null && !msgsrc.equals("")) {  // 如果收到了信息
+                                String R = msgsrc.split(",")[0];
+//                        String TID_Src2 = msgsrc.split(",")[1] + "," + msgsrc.split(",")[2];
 
-                            //三方认证第四步，接受来自B的数据
-                            msgsrc = sb.toString();
-                            if (msgsrc.equals("YES")) {
-
-                                String IDsat_Src = ID_Src;
+                                //计算CK会话密钥,注意因为加密原因必须8位，CK取前8位置,和B中过程一样的目的就是得到和B一样的CK
+                                String C_K = null;
                                 try {
-                                    sql = "insert into leoleo(IDsat,SSID,TidSrc,TidDst,st,token) values(?,?,?,?,?,?) ";
-                                    PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
-                                    pst.setString(1, IDsat_Src);
-                                    pst.setInt(2, SSID);
-                                    pst.setString(3, TID_Src);
-                                    pst.setString(4, TID_Dst);
-                                    pst.setInt(5, 1);
-                                    pst.setString(6, Token);
-                                    pst.executeUpdate();
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
+                                    C_K = ds.DESencode(R, preleo.getMainKey());
+                                } catch (Exception e) {
+
                                 }
-                            } else {
-                                System.out.println("三方认证失败");
-                            }
+                                if (C_K!=null && !C_K.equals("")) {   // 防止计算会话错误
+                                    //System.out.println(C_K);
+                                    String CK = "";
+                                    if(C_K.length() >= 8) {
+                                        CK = C_K.substring(0, 8);
+                                        //System.out.println(CK);
+                                    }else {
+                                        CK = C_K + 'a'*(8-C_K.length());
+                                    }
+                                    //利用CK进行解密Token获得时间戳和校验码，比较时间戳和校验码是否一致
+                                    String Token = null;
+                                    try {
+                                        Token = ds.DESdecode(msgsrc.split(",")[3], CK);
+                                    } catch (Exception e) {
+                                    }
+                                    if (Token!=null && !Token.equals("")) {
+                                        //System.out.println(Token);
+                                        String Tt = Token.split(",")[1];
+                                        String MAC = Token.split(",")[3];
 
-                        } else {
-                            System.out.println("三方认证失败");
+                                        //计算MAC
+                                        String XMAC = null;
+                                        try {
+                                            XMAC = ds.DESencode(R + Tt + TID_Src, preleo.getMainKey());
+                                        } catch (Exception e) {
+                                        }
+                                        if (XMAC!=null && !XMAC.equals("")) {  //防止Mainkey不足8位报错
+                                            System.out.println("获得校验码:" + XMAC);
+                                            long Ttt = System.currentTimeMillis();
+                                            if ((Ttt - Long.parseLong(Tt) < 2000) && MAC.equals(XMAC)) {
+                                                //计算XRES 预期响应数据
+                                                System.out.println("LEO-B校验数据");
+                                                String RES = null;
+                                                try {
+                                                    RES = ds.DESencode(R, CK);
+                                                    writer.write(RES);
+                                                    writer.write("eof\n");
+                                                    writer.flush();
+                                                } catch (Exception e) {
+                                                }
 
+                                                System.out.println("LEO-B向LEO-A发送信息:" + RES);
+                                                sb.setLength(0);
+                                                //设置超时间为10秒
+                                                try {
+                                                    socket.setSoTimeout(10 * 1000);
+                                                    while ((temp = reader.readLine()) != null) {
+                                                        if ((index = temp.indexOf("eof")) != -1) {
+                                                            sb.append(temp.substring(0, index));
+                                                            break;
+                                                        }
+                                                        sb.append(temp);
+                                                    }
+                                                } catch (SocketException e) {
+                                                } catch (IOException e) {
+                                                }
+                                                //三方认证第四步，接受来自B的数据
+                                                msgsrc = sb.toString();
+                                                if(msgsrc!=null && !msgsrc.equals("")) {  //防止对方验证错误 不发送信息 ，此时读取的信息为空
+                                                    if (msgsrc.equals("YES")) {
 
-                            try {
-                                writer.close();
-                                writer.close();
-                                socket.close();
-                            } catch (IOException e) {
+                                                        String IDsat_Src = ID_Src;
+                                                        try {
+                                                            sql = "insert into leoleo(IDsat,SSID,TidSrc,TidDst,st,token) values(?,?,?,?,?,?) ";
+                                                            PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
+                                                            pst.setString(1, IDsat_Src);
+                                                            pst.setInt(2, SSID);
+                                                            pst.setString(3, TID_Src);
+                                                            pst.setString(4, TID_Dst);
+                                                            pst.setInt(5, 1);
+                                                            pst.setString(6, Token);
+                                                            pst.executeUpdate();
+                                                            connection.close();
+                                                        } catch (SQLException e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    } else {
+                                                        System.out.println("三方认证失败");
+                                                    }
+                                                }else {
+                                                    System.out.println("认证失败");
+                                                    try {
+                                                        socket.close();
+                                                        connection.close();
+                                                    } catch (IOException e) {
 
+                                                    }
+                                                }
+
+                                            }else {
+                                                try {
+                                                    socket.close();
+                                                    connection.close();
+                                                } catch (IOException e) {
+
+                                                }
+                                            }
+                                        } else {
+                                            System.out.println("三方认证失败");
+                                            try {
+                                                writer.close();
+                                                connection.close();
+                                                socket.close();
+                                            } catch (IOException e) {
+                                            }
+                                        }
+
+                                        statement.close();
+                                        connection.close();
+                                        try {
+                                            reader.close();
+                                            writer.close();
+                                            socket.close();
+                                        } catch (IOException e) {
+
+                                        }
+                                    }else {
+                                        try {
+                                            socket.close();
+
+                                            connection.close();
+                                        } catch (IOException e) {
+                                        }
+                                    }
+                                }else {
+                                    try {
+                                        socket.close();
+
+                                        connection.close();
+                                    } catch (IOException e) {
+
+                                    }
+                                }
+                            }else {
+                                try {
+                                    socket.close();
+
+                                    connection.close();
+                                } catch (IOException e) {
+
+                                }
                             }
                         }
+                    }
+                }else {
+                    try {
 
-                        statement.close();
                         connection.close();
-                        try {
-                            reader.close();
-                            writer.close();
-                            socket.close();
-                        } catch (IOException e) {
-
-                        }
+                        socket.close();
+                    } catch (IOException e) {
 
                     }
+                    System.out.println("CK错误");
                 }
             }
         }
@@ -353,7 +410,7 @@ public class LEOTask implements Runnable {
             System.out.println(preleo);
             System.out.println(leoleo);
             //生成新的请求
-            String msg_Dst = "2" + "," + ct + ","+ preleo.getIDsat() + ","+ leoleo.getTidDst() + "," + leoleo.getToken();
+            String msg_Dst = "2" + "," + ct + "," + preleo.getIDsat() + "," + leoleo.getTidDst() + "," + leoleo.getToken();
             //System.out.println(msg_B);
 
             //将信息发送给B
@@ -365,7 +422,7 @@ public class LEOTask implements Runnable {
             } catch (IOException e) {
             }
 
-            System.out.println("LEO-B向LEO-A发送信息："+msg_Dst);
+            System.out.println("LEO-B向LEO-A发送信息：" + msg_Dst);
 
             //二方认证  Step3
 
@@ -374,7 +431,6 @@ public class LEOTask implements Runnable {
             String TID_Src = leoleo.getTidSrc();
             //System.out.println("来到两方认证子线程完成剩余两方认证操作");
             //在子线程继续而二方认证第三步
-
 
 
             sb.setLength(0);
@@ -394,50 +450,64 @@ public class LEOTask implements Runnable {
             }
 
             String newTID_Src = sb.toString();
-            System.out.println("LEO-B接收LEO-A信息："+newTID_Src);
-            if (newTID_Src.equals(leoleo.getTidDst())) {
-                System.out.println("LEO-B校验数据");
-                System.out.println("二次认证成功");
-                //更改自己星星认证表的三方认证时候存的数据
-                sql = "UPDATE leoleo set ST = 1 WHERE IDsat = '" + leoleo.getIDsat()+"'";
-                boolean execute = statement.execute(sql);
-                System.out.println("二次认证成功，更改LEO-B认证表成功");
-                String massage_Dst = "YES";
-                try {
-                    writer.write(massage_Dst);
-                    writer.write("eof\n");
-                    writer.flush();
-                } catch (IOException e) {
+            System.out.println("LEO-B接收LEO-A信息：" + newTID_Src);
+            if (newTID_Src!=null && !newTID_Src.equals("")) {
+                if (newTID_Src.equals(leoleo.getTidSrc())) {
+                    System.out.println("LEO-B校验数据");
+                    System.out.println("二次认证成功");
+                    //更改自己星星认证表的三方认证时候存的数据
+                    sql = "UPDATE leoleo set ST = 1 WHERE IDsat = '" + leoleo.getIDsat() + "'";
+                    boolean execute = statement.execute(sql);
+                    System.out.println("二次认证成功，更改LEO-B认证表成功");
+                    String massage_Dst = "YES";
+                    try {
+                        writer.write(massage_Dst);
+                        writer.write("eof\n");
+                        writer.flush();
+                    } catch (IOException e) {
 
+                    }
+                    System.out.println("LEO-B向LEO-A发送信息：LEO-B端二次认证成功");
+                    connection.close();
+                    statement.close();
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+
+                    }
+
+                } else {
+                    System.out.println("LEO-B校验数据");
+                    System.out.println("二次认证失败");
+
+                    sql = "UPDATE leoleo set ST = 0 WHERE IDsat = '" + leoleo.getIDsat() + "'";
+                    boolean execute = statement.execute(sql);
+                    sql = "delete from leoleo where IDsat =  '" + leoleo.getIDsat() + "'";
+                    boolean i = statement.execute(sql);
+                    statement.close();
+                    connection.close();
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+
+                    }
+                    //return "0";
                 }
-                System.out.println("LEO-B向LEO-A发送信息：LEO-B端二次认证成功");
-                connection.close();
+
+            }else {
+                sql = "UPDATE leoleo set ST = 0 WHERE IDsat = '" + leoleo.getIDsat() + "'";
+                boolean execute = statement.execute(sql);
+                sql = "delete from leoleo where IDsat =  '" + leoleo.getIDsat() + "'";
+                boolean execute1 = statement.execute(sql);
                 statement.close();
+                connection.close();
                 try {
                     socket.close();
                 } catch (IOException e) {
 
                 }
-
-            } else {
-                System.out.println("LEO-B校验数据");
-                System.out.println("二次认证失败");
-
-                sql = "UPDATE leoleo set ST = 0 WHERE IDsat = '" + leoleo.getIDsat()+"'";
-                boolean execute = statement.execute(sql);
-
-                connection.close();
-                statement.close();
-                try {
-                    socket.close();
-                } catch (IOException e) {
-
-                }
-                //return "0";
             }
-
         }
-
     }
 
 
