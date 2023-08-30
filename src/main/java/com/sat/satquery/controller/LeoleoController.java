@@ -76,9 +76,8 @@ public class LeoleoController {
             boolean flag = true;
             Socket socket = null;
             try {
-                System.out.println("Port:"+info.getPort());
 //                socket = new Socket(info.getIp(), info.getPort());
-                socket = new Socket("127.0.0.1", info.getPort());
+                socket = new Socket(info.getIp(), info.getPort());
             } catch (Exception e) {
                 flag = false;
                 System.out.println("目标主机未开启");

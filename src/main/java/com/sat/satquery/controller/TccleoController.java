@@ -39,7 +39,7 @@ public class TccleoController {
     @GetMapping("/auth")
     public String Auth() throws IOException {
         String r = "";
-        Socket socket = new Socket("127.0.0.1",8899);
+        Socket socket = new Socket("fd15:4ba5:5a2b:1008:2031:22d0:986:8358",8899);
         List<Preleo> list = iPreleoService.list();
         LeoTccAuthTask t = new LeoTccAuthTask(socket,list.get(0));
         Thread th  =new Thread(t);
