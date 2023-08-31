@@ -1,6 +1,7 @@
 package com.sat.satquery.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sat.domain.Info;
@@ -17,7 +18,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -71,26 +74,38 @@ public class LeoleoController {
         //遍历所有与A相连的卫星
         int cnt = list.size();
         CountDownLatch latch = new CountDownLatch(cnt);
-        System.out.println(list);
+
         for(Info info: list) {
             boolean flag = true;
             Socket socket = null;
             try {
+                System.out.println("Port:"+info.getPort());
 //                socket = new Socket(info.getIp(), info.getPort());
                 socket = new Socket(info.getIp(), info.getPort());
             } catch (Exception e) {
                 flag = false;
-                System.out.println("目标主机未开启");
                 String iDsat = info.getIDsat();   //之前是否存在认证状态 存在就删除，不存在
-                Leoleo leoleo = iLeoleoService.getById(iDsat);
+                QueryWrapper qw = new QueryWrapper<>();
+                qw.eq("IDsat",iDsat);
+                List<Leoleo> leoleo = iLeoleoService.list(qw);
+                System.out.println("leoleo"+leoleo);
                 Leoleo leoleoa = new Leoleo();
-                leoleoa.setSt(3);//设置状态 为3
                 leoleoa.setIDsat(iDsat);
-                leoleoa.setLog("目标主机未开启\n认证失败");
+                leoleoa.setSt(3);//设置状态 为3
+                leoleoa.setLog("目标主机未开启\n认证失败\n");
                 if(leoleo!=null){
-                    iLeoleoService.removeById(iDsat);
+//                    iLeoleoService.removeById(iDsat);
+                    leoleoa.setToken(leoleo.get(0).getToken());
+                    leoleoa.setTidSrc(leoleo.get(0).getTidSrc());
+                    leoleoa.setTidDst(leoleo.get(0).getTidDst());
+                    leoleoa.setSsid(leoleo.get(0).getSsid());
+                    iLeoleoService.remove(qw);
                 }
+                System.out.println("leoleoa"+leoleoa);
+
+                System.out.println("beforeileoleoservice"+iLeoleoService.list());
                 iLeoleoService.save(leoleoa);
+                System.out.println("ileoleoservice"+iLeoleoService.list());
                 latch.countDown();
             }
             if(flag) {
@@ -101,7 +116,6 @@ public class LeoleoController {
         try {
             latch.await();  //
         } catch (InterruptedException e) {
-
         }
 
 
@@ -109,8 +123,10 @@ public class LeoleoController {
         List<Leoleo> result = iLeoleoService.list();
         ArrayList<Leoleo> re = new ArrayList<>();
         for (Leoleo le:
-             result) {
-            re.add(le);
+                result) {
+            if(!le.getLog().equals("目的卫星认证成功")) {
+                re.add(le);
+            }
         }
         System.out.println(re);
         return re;

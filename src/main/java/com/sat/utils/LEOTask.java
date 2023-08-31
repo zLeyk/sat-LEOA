@@ -306,7 +306,7 @@ public class LEOTask implements Runnable {
 
                                                         String IDsat_Src = ID_Src;
                                                         try {
-                                                            sql = "insert into leoleo(IDsat,SSID,TidSrc,TidDst,st,token) values(?,?,?,?,?,?) ";
+                                                            sql = "insert into leoleo(IDsat,SSID,TidSrc,TidDst,st,token,log) values(?,?,?,?,?,?,?) ";
                                                             PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
                                                             pst.setString(1, IDsat_Src);
                                                             pst.setInt(2, SSID);
@@ -314,6 +314,7 @@ public class LEOTask implements Runnable {
                                                             pst.setString(4, TID_Dst);
                                                             pst.setInt(5, 1);
                                                             pst.setString(6, Token);
+                                                            pst.setString(7,"目的卫星认账成功");
                                                             pst.executeUpdate();
                                                             connection.close();
                                                         } catch (SQLException e) {
