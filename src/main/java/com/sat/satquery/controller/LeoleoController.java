@@ -93,7 +93,7 @@ public class LeoleoController {
                 leoleoa.setIDsat(iDsat);
                 leoleoa.setSt(3);//设置状态 为3
                 leoleoa.setLog("目标主机未开启\n认证失败\n");
-                if(leoleo!=null){
+                if(leoleo!=null&&leoleo.size()==1){
 //                    iLeoleoService.removeById(iDsat);
                     leoleoa.setToken(leoleo.get(0).getToken());
                     leoleoa.setTidSrc(leoleo.get(0).getTidSrc());
