@@ -39,8 +39,13 @@ public class TccleoController {
     @GetMapping("/auth")
     public String Auth() throws IOException {
         String r = "";
-        System.out.println("123123");
-        Socket socket = new Socket("127.0.0.1",8899);
+        Socket socket = null;
+        try {
+            socket = new Socket("127.0.0.1",8899);
+        }catch (Exception e){
+            System.out.println("连接失败");
+            return "被封禁";
+        }
         List<Preleo> list = iPreleoService.list();
         LeoTccAuthTask t = new LeoTccAuthTask(socket,list.get(0));
         Thread th  =new Thread(t);
