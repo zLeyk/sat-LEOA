@@ -626,12 +626,12 @@ public class LeoLeoAuthTask implements Runnable {
                 }
             } else if (s.split(",")[0].equals("2")) {
                 log += "两方认证\n";
-                log += "卫星:" + DstIDsat + "发送信息:" + s + "\n";
+                log += "卫星" + DstIDsat + "发送信息:" + s + "\n";
                 //二方认证 Step2 获得来自A的数据，根据时间戳，A临时身份，Token，比较，并将B自身数据发送给A
                 System.out.println("Step3:");
                 log += "Step3:\n";
                 System.out.println("LEO-B接收LEO-A信息：" + s);
-                log += "卫星:" + SrcIDsat + "接收信息:" + s + "\n";
+                log += "卫星" + SrcIDsat + "接收信息:" + s + "\n";
                 String T = s.split(",")[1];
                 String ID_Dst = s.split(",")[2];  // 目的卫星的ID
                 String TID_Dst = s.split(",")[3] + "," + s.split(",")[4]; // 目的卫星的临时身份
