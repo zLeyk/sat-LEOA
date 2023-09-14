@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.sound.sampled.Line;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,25 +72,29 @@ public class LeoleoController {
     @PostMapping("/leoAu")
     public ArrayList<Leoleo> broadcastInfo(@RequestBody ArrayList<Info> list) {
         //调用Serice查询B的因为后面需要预置信息
+
         List<Preleo> list1 = iPreleoService.list();
         //遍历所有与A相连的卫星
         int cnt = list.size();
         CountDownLatch latch = new CountDownLatch(cnt);
-
+        QueryWrapper wq = new QueryWrapper<>();
+        wq.ne("ST",1);
+        iLeoleoService.remove(wq);
         for(Info info: list) {
             boolean flag = true;
             Socket socket = null;
             try {
                 System.out.println("Port:"+info.getPort());
-//                socket = new Socket(info.getIp(), info.getPort());
-                socket = new Socket(info.getIp(), info.getPort());
+                //socket = new Socket(info.getIp(), info.getPort());
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(info.getIp(), info.getPort()), 3000); // 设置连接超时时间为3秒
             } catch (Exception e) {
+                System.out.println("yesyes");
                 flag = false;
                 String iDsat = info.getIDsat();   //之前是否存在认证状态 存在就删除，不存在
                 QueryWrapper qw = new QueryWrapper<>();
                 qw.eq("IDsat",iDsat);
                 List<Leoleo> leoleo = iLeoleoService.list(qw);
-                System.out.println("leoleo"+leoleo);
                 Leoleo leoleoa = new Leoleo();
                 leoleoa.setIDsat(iDsat);
                 leoleoa.setSt(3);//设置状态 为3
@@ -116,11 +122,13 @@ public class LeoleoController {
         try {
             latch.await();  //
         } catch (InterruptedException e) {
+
         }
 
 
         //查询认证过程插入的星间认证信息 ，并返回List
         List<Leoleo> result = iLeoleoService.list();
+        System.out.println("result:"+result);
         ArrayList<Leoleo> re = new ArrayList<>();
         for (Leoleo le:
                 result) {
@@ -128,7 +136,7 @@ public class LeoleoController {
                 re.add(le);
             }
         }
-        System.out.println(re);
+        System.out.println("rererererer"+re);
         return re;
     }
 

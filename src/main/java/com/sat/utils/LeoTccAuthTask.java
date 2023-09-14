@@ -56,6 +56,7 @@ public class LeoTccAuthTask implements Runnable {
         String t = Long.toString(l);
         //临时身份
         String iDsat = preleo.getIDsat();
+        System.out.println(preleo);
         //临时身份
         String Tid = t + "," + iDsat;
         try {
@@ -221,6 +222,7 @@ public class LeoTccAuthTask implements Runnable {
 
                         try {
                             writer.write(req);
+                            System.out.println("reqreq:"+req);
                             writer.write("eof\n");
                             writer.flush();
                         } catch (IOException e) {
