@@ -45,7 +45,6 @@ public class LeoTccAuthTask implements Runnable {
      */
     private void handleSocket(){
         setSt("认证失败");
-
         DESUtils ds = new DESUtils();
         MD5Utils md = new MD5Utils();
         //发送的消息  消息类型
@@ -67,7 +66,6 @@ public class LeoTccAuthTask implements Runnable {
             try {
                 client.close();
             } catch (IOException ex) {
-
             }
         }
 
@@ -79,14 +77,12 @@ public class LeoTccAuthTask implements Runnable {
             writer.write("eof\n");
             writer.flush();
         } catch (IOException e) {
-
         }
 
 
         try {
             br = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"));
         } catch (IOException e) {
-
         }
 
         // Step3
@@ -113,34 +109,11 @@ public class LeoTccAuthTask implements Runnable {
         }
 
         String s = sb.toString();
-//        wr.write("Step2:\n");
-//        wr.write("TCC验证临时身份\n");
-//        wr.write("TCC合成认证数据\n");
-//        wr.write("TCC发送信息:"+s+"\n");
-//        wr.write("Step3:\n");
-//        System.out.println("Step2:\n"+"<br/>");
-//        System.out.println("TCC验证临时身份\n"+"<br/>");
-//        System.out.println("TCC合成认证数据\n"+"<br/>");
-//        System.out.println("TCC发送信息:"+s+"\n"+"<br/>");
-//        System.out.println("Step3:"+"<br/>");
-//        pro += "Step2:\n";
-//        pro += "TCC验证临时身份\n";
-//        pro += "TCC合成认证数据\n";
-//        pro += "TCC发送信息:";
-//        pro += "Step3:";
 
-
-
-        //解密数据
-//        System.out.println("接收信息:"+s+"<br/>");
-//        pro += "接收信息:"+s;
-//        wr.write("LEO接收信息:"+s+"\n");
-//        try {
         if(!s.equals("")) {  //收到了地面的信息
             //合成CK
             String CK;
             String cks = new StringBuffer(md.encrypt(preleo.getDkauth()+preleo.getDkenc())).reverse().toString();
-
             if (cks.length()>= 8){
                 CK = cks.substring(0,8);
             }else {
@@ -152,15 +125,8 @@ public class LeoTccAuthTask implements Runnable {
             } catch (Exception e) {
                 System.out.println("解密失败");
             }
-//            System.out.println("解密信息:" + s + "<br/>");
-//            pro += "解密信息:" + s;
-//            wr.write("解密信息:" + s + "\n");
+
             if (s.split(",").length != 3) {
-//                System.out.println("认证失败" + "<br/>");
-//                pro += "认证失败";
-//                setLog(pro);
-//                wr.write("认证失败\n");
-//                wr.close();
                 System.out.println("解密失败\n");
                 try {
                     writer.close();

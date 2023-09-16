@@ -69,7 +69,6 @@ public class TccLeoLeoAuthTask implements Runnable {
         try {
             msg = ds.DESencode(msg,preleo.getK());
         } catch (Exception e) {
-            System.out.println("密钥错误");
         }
         if(msg!= null && !msg.equals("")) {   ///密钥错误 会继续执行 但是 msg为空
             System.out.println("加密信息:" + msg);
@@ -110,7 +109,7 @@ public class TccLeoLeoAuthTask implements Runnable {
             }
             sb.setLength(0);
             try {
-                br = new BufferedReader(new InputStreamReader(client.getInputStream(), "GBK"));
+                br = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"));
                 while ((temp = br.readLine()) != null) {
                     if ((index = temp.indexOf("eof")) != -1) {
                         sb.append(temp.substring(0, index));
@@ -119,22 +118,10 @@ public class TccLeoLeoAuthTask implements Runnable {
                     sb.append(temp);
                 }
             } catch (IOException e) {
-//                System.out.println("通信失败ca");
-//                e.printStackTrace();
-//                log += "卫星" + preleo.getIDsat() + "和地面通信失败" + "\n";
-//                System.out.println("Io异常");
-//                try {
-//                    writer.close();
-//                    br.close();
-//                    client.close();
-//                } catch (IOException ex) {
-//
-//                }
-//                return log;
             }
             String s = sb.toString();
-            if (s!= null && s.equals("")) {
-                log += "卫星" + preleo.getIDsat() + "密钥错误，和地面通信失败" + "\n";
+            if (s != null && s.equals("")) {
+                log += "卫星" + preleo.getIDsat() + "密钥K错误" + "\n";
                 try {
                     writer.close();
                     br.close();
@@ -144,22 +131,21 @@ public class TccLeoLeoAuthTask implements Runnable {
                 }
                 System.out.println(log);
                 return log;
-            }else {
-                System.out.println("失败");
+            } else {
+                //System.out.println("三方第三步，A获取需要解密信息");
+                //System.out.println(s);
+                try {
+                    writer.close();
+                    br.close();
+                    client.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                //返回和地面通信获得的信息和流程，逗号分隔
+                return s + "," + log;
             }
-            //System.out.println("三方第三步，A获取需要解密信息");
-            //System.out.println(s);
-            try {
-                writer.close();
-                br.close();
-                client.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            //返回和地面通信获得的信息和流程，逗号分隔
-            return s + "," + log;
         }else {
-            return "和地面通信失败，DST卫星密钥错误";
+            return "目的卫星密钥K错误\n";
         }
     }
 

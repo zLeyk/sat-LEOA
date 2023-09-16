@@ -40,8 +40,8 @@ public class LEOTask implements Runnable {
         //  注释是是查jdbc连接数据库查询数据表
         Class.forName("org.sqlite.JDBC");
         String url = "jdbc:sqlite::resource:db/leoa.db";
-        Connection connection = null;
-        Statement statement = null;
+        Connection connection = DriverManager.getConnection(url);
+        Statement statement = connection.createStatement();
         String sql = "";
         ResultSet resultSet = null;
         BufferedReader reader = null;
@@ -73,18 +73,15 @@ public class LEOTask implements Runnable {
         }
 
         String s = sb.toString();// s是收到的信息
-        System.out.println("Step2:");
-        //System.out.println("B发广播信息，发给A的信息是:"+msg);
-
         //认证请求方的SSID
-        Integer SSID = Integer.valueOf(s);
+        Integer SSID = Integer.valueOf(s.split(",")[0]);
+        String IDsat_Src_C = s.split(",")[1];   //发起认证卫星的ID
+
         //查询数据库表中的是否有SSID_B
         int exist;
         connection = DriverManager.getConnection(url);
         statement = connection.createStatement();
-        //sql = "select * from leoleo";
-//        sql = "delete from leoleo";
-//        boolean r1 = statement.execute(sql);
+
         sql = "select * from leoleo where SSID = " + SSID;
         resultSet = statement.executeQuery(sql);
         exist = 0;
@@ -117,14 +114,17 @@ public class LEOTask implements Runnable {
         }
         resultSet.close();
         //没有查到SRC的信息
-        if (exist == 0) {
+        if (exist == 0 || (exist==1 && leoleo.getSt() != 1)) {
             //如果三方认证
+            sql = "delete from leoleo where IDsat='"+IDsat_Src_C+"'";
+            statement.execute(sql);
             TccLeoLeoAuthTask leoLeoAuthTask = null;
             Socket sockettcc = null;
             Thread thread = null;
             try {
                 sockettcc = new Socket("127.0.0.1", 8899);
                 //三方认证的星地认证  传入socket 自身得预置信息 SSID
+                System.out.println("preleopreleo"+preleo);
                 leoLeoAuthTask = new TccLeoLeoAuthTask(sockettcc, preleo, SSID);
                 thread = new Thread(leoLeoAuthTask);
                 thread.start();
@@ -141,9 +141,46 @@ public class LEOTask implements Runnable {
             //怎么把数据拿出来
             //目的卫星和地面通信的信息 包括认证流程
             String tccmsg = leoLeoAuthTask.getData();
+            String log = "Step1:\n";
+            log += "卫星"+IDsat_Src_C+"发送自身广播ID:"+SSID;
+            log += "Step2:\n";
+            log += "和地面建立连接";
+            log += "Step3:\n";
+            log += "卫星端校验数据\n";
             //如果和地面通信失败  关闭   和地面通信 Leo发送信息 Tcc接收信息 在TccLeoLeoAuthTask处理 接收的信息 在这个类处理
             // 如果前两步出现错误，tccmsg的log里面会出现认证失败，tccmsg包括返回信息和认证流程，如果认证失败 只存在认证流程
-            if(tccmsg.contains("失败")){
+            System.out.println("tccmsgtccmsgtccmsg");
+            System.out.println(tccmsg);
+            System.out.println("------------------------------");
+            if(tccmsg.contains("失败") || tccmsg.contains("非法")||tccmsg.contains("错误")){
+                if(tccmsg.contains("密钥K错误")){
+                    log += "目的卫星身份保护密钥错误\n目的卫星认证失败\n";
+                    msg = "身份保护密钥K错误\n";
+                }else if(tccmsg.contains("非法卫星")){
+                    log += "包含非法卫星\n目的卫星认证失败\n";
+                    msg = "存在非法卫星\n";
+                } else if (tccmsg.contains("包含认证失败卫星")) {
+                    log += "包含认证失败卫星\n目的卫星认证失败\n";
+                    msg = "存在认证失败卫星\n";
+                }else if (tccmsg.contains("会话密钥错误")){
+                    log += "会话密钥错误\n目的卫星认证失败\n";
+                    msg = "会话密钥错误\n";
+                } else if (tccmsg.contains("和地面通信失败")) {
+                    log += "和地面通信失败\n目的卫星认证失败\n";
+                    msg = "和地面通信失败\n";
+                }
+                sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                statement.execute(sql);
+                try {
+                    writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "GBK"));
+                    //生成新的请求
+                    msg = "3," + msg;
+                    //将信息发送给B
+                    writer.write(msg);
+                    writer.write("eof\n");
+                    writer.flush();
+                } catch (Exception e) {
+                }
                 try {
                     socket.close();
                 } catch (IOException e) {
@@ -151,22 +188,22 @@ public class LEOTask implements Runnable {
             } // 地面通信成功  并返回接收的信息
             else {
                 System.out.println("Step4");
+                log += "Step4:\n";
                 System.out.println("DST接收TCC信息:" + tccmsg);
-
+                log += "卫星"+preleo.getIDsat()+"接收数据:"+tccmsg+"\n";
                 //Step3 根据DST的会话密钥解密获得DST的临时身份SRC的真实身份，临时身份真实身份和时间戳
                 String E_Dst = null;
                 try {
                     E_Dst = ds.DESdecode(tccmsg.split(",")[0], preleo.getCk());
                 } catch (Exception e) {
-                    try {
-                        socket.close();
-                    } catch (IOException ee) {
-                    }
                 }
                 if(E_Dst!=null && !E_Dst.equals("")) {   //防止预置卫星的CK不足8位 报错
                     //解密和TCC通信获得的信息
                     if (E_Dst.split(",").length != 7) {
                         try {
+                            log += "会话密钥错误\n目的卫星认证失败\n";
+                            sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                            statement.execute(sql);
                             socket.close();
                         } catch (IOException e) {
                         }
@@ -183,6 +220,9 @@ public class LEOTask implements Runnable {
                         Long ct = System.currentTimeMillis();
                         //地面返回的信息 时间戳太大
                         if ((ct - tt) > 2000) {
+                            log += "时间不符合新鲜性要求\n目的卫星认证失败\n";
+                            sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                            statement.execute(sql);
                             System.out.println("认证失败");
                             statement.close();
                             connection.close();
@@ -193,6 +233,7 @@ public class LEOTask implements Runnable {
                             }
                             //和源卫星继续认证 发送一个新的请求信息
                         } else {
+                            log += "Step5:\n";
                             String msg_Src = null;
                             try {
                                 writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "GBK"));
@@ -207,6 +248,9 @@ public class LEOTask implements Runnable {
                             System.out.println("目的卫星向源卫星发送信息:" + msg_Src);
                             //
 
+                            log += "卫星"+preleo.getIDsat() +"向卫星"+IDsat_Src_C+"发送数据:"+msg_Src+"\n";
+                            log += "Step6:\n";
+                            log += "卫星"+IDsat_Src_C+"校验数据\n";
                             //Step4
                             System.out.println("Step6:");
                             //设置超时间为10秒
@@ -214,8 +258,6 @@ public class LEOTask implements Runnable {
                                 socket.setSoTimeout(10 * 1000);
                             } catch (SocketException e) {
                             }
-
-
 
                             sb.setLength(0);
                             try {
@@ -233,6 +275,7 @@ public class LEOTask implements Runnable {
                             String msgsrc = sb.toString();
 
                             if (msgsrc!=null && !msgsrc.equals("")) {  // 如果收到了信息
+                                log += "卫星"+IDsat_Src_C+"接收到数据:"+msgsrc+"\n";
                                 String R = msgsrc.split(",")[0];
 //                        String TID_Src2 = msgsrc.split(",")[1] + "," + msgsrc.split(",")[2];
 
@@ -274,7 +317,6 @@ public class LEOTask implements Runnable {
                                             long Ttt = System.currentTimeMillis();
                                             if ((Ttt - Long.parseLong(Tt) < 2000) && MAC.equals(XMAC)) {
                                                 //计算XRES 预期响应数据
-                                                System.out.println("LEO-B校验数据");
                                                 String RES = null;
                                                 try {
                                                     RES = ds.DESencode(R, CK);
@@ -283,8 +325,10 @@ public class LEOTask implements Runnable {
                                                     writer.flush();
                                                 } catch (Exception e) {
                                                 }
-
                                                 System.out.println("LEO-B向LEO-A发送信息:" + RES);
+                                                log +=  "卫星"+preleo.getIDsat() +"向卫星"+IDsat_Src_C+"发送数据:"+RES+"\n";
+                                                log += "Step7:\n";
+                                                log += "卫星"+IDsat_Src_C+"校验数据\n";
                                                 sb.setLength(0);
                                                 //设置超时间为10秒
                                                 try {
@@ -303,7 +347,8 @@ public class LEOTask implements Runnable {
                                                 msgsrc = sb.toString();
                                                 if(msgsrc!=null && !msgsrc.equals("")) {  //防止对方验证错误 不发送信息 ，此时读取的信息为空
                                                     if (msgsrc.equals("YES")) {
-
+                                                        log += "校验成功\n";
+                                                        log += "目的卫星认证成功\n";
                                                         String IDsat_Src = ID_Src;
                                                         try {
                                                             sql = "insert into leoleo(IDsat,SSID,TidSrc,TidDst,st,token,log) values(?,?,?,?,?,?,?) ";
@@ -314,7 +359,7 @@ public class LEOTask implements Runnable {
                                                             pst.setString(4, TID_Dst);
                                                             pst.setInt(5, 1);
                                                             pst.setString(6, Token);
-                                                            pst.setString(7,"目的卫星认账成功");
+                                                            pst.setString(7,log);
                                                             pst.executeUpdate();
                                                             connection.close();
                                                         } catch (SQLException e) {
@@ -324,7 +369,9 @@ public class LEOTask implements Runnable {
                                                         System.out.println("三方认证失败");
                                                     }
                                                 }else {
-                                                    System.out.println("认证失败");
+                                                    log += "校验不通过\n目的卫星认证失败\n";
+                                                    sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                                                    statement.execute(sql);
                                                     try {
                                                         socket.close();
                                                         connection.close();
@@ -334,6 +381,9 @@ public class LEOTask implements Runnable {
                                                 }
 
                                             }else {
+                                                log += "校验不通过\n目的卫星认证失败\n";
+                                                sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                                                statement.execute(sql);
                                                 try {
                                                     socket.close();
                                                     connection.close();
@@ -342,7 +392,9 @@ public class LEOTask implements Runnable {
                                                 }
                                             }
                                         } else {
-                                            System.out.println("三方认证失败");
+                                            log += "主密钥错误\n目的卫星认证失败\n";
+                                            sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                                            statement.execute(sql);
                                             try {
                                                 writer.close();
                                                 connection.close();
@@ -361,23 +413,31 @@ public class LEOTask implements Runnable {
 
                                         }
                                     }else {
+                                        log += "解密失败\n目的卫星认证失败\n";
+                                        sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                                        statement.execute(sql);
                                         try {
                                             socket.close();
-
                                             connection.close();
                                         } catch (IOException e) {
                                         }
                                     }
                                 }else {
+                                    log += "解密失败\n目的卫星认证失败\n";
+                                    sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                                    statement.execute(sql);
                                     try {
                                         socket.close();
-
                                         connection.close();
                                     } catch (IOException e) {
 
                                     }
                                 }
                             }else {
+                                log += "校验失败\n";
+                                log += "目的卫星认证失败\n";
+                                sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                                statement.execute(sql);
                                 try {
                                     socket.close();
 
@@ -389,21 +449,24 @@ public class LEOTask implements Runnable {
                         }
                     }
                 }else {
+                    log += "会话密钥错误\n目的卫星认证失败\n";
+                    sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+                    statement.execute(sql);
                     try {
-
+                        String msg = "3,目的卫星会话密钥错误";
+                        writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "GBK"));
+                        writer.write(msg);
+                        writer.write("eof\n");
+                        writer.flush();
                         connection.close();
                         socket.close();
                     } catch (IOException e) {
-
                     }
-                    System.out.println("CK错误");
                 }
             }
         }
         else {
             System.out.println("判断进行三方认证还是两方认证：二方认证");
-
-            //二方认证  Step1 根据获得B——SSID获得leoelo表中IDsat为B的一行数据，将时间戳，临时身份A和 Token发给B
 
             //当前时间
             Long ct1 = System.currentTimeMillis();
@@ -451,11 +514,8 @@ public class LEOTask implements Runnable {
             }
 
             String newTID_Src = sb.toString();
-            System.out.println("LEO-B接收LEO-A信息：" + newTID_Src);
             if (newTID_Src!=null && !newTID_Src.equals("")) {
                 if (newTID_Src.equals(leoleo.getTidSrc())) {
-                    System.out.println("LEO-B校验数据");
-                    System.out.println("二次认证成功");
                     //更改自己星星认证表的三方认证时候存的数据
                     sql = "UPDATE leoleo set ST = 1 WHERE IDsat = '" + leoleo.getIDsat() + "'";
                     boolean execute = statement.execute(sql);
@@ -478,9 +538,6 @@ public class LEOTask implements Runnable {
                     }
 
                 } else {
-                    System.out.println("LEO-B校验数据");
-                    System.out.println("二次认证失败");
-
                     sql = "UPDATE leoleo set ST = 0 WHERE IDsat = '" + leoleo.getIDsat() + "'";
                     boolean execute = statement.execute(sql);
                     sql = "delete from leoleo where IDsat =  '" + leoleo.getIDsat() + "'";
@@ -495,7 +552,7 @@ public class LEOTask implements Runnable {
                     //return "0";
                 }
 
-            }else {
+            } else {
                 sql = "UPDATE leoleo set ST = 0 WHERE IDsat = '" + leoleo.getIDsat() + "'";
                 boolean execute = statement.execute(sql);
                 sql = "delete from leoleo where IDsat =  '" + leoleo.getIDsat() + "'";

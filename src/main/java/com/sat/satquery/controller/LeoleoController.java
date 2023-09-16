@@ -78,18 +78,14 @@ public class LeoleoController {
         int cnt = list.size();
         CountDownLatch latch = new CountDownLatch(cnt);
         QueryWrapper wq = new QueryWrapper<>();
-        wq.ne("ST",1);
-        iLeoleoService.remove(wq);
         for(Info info: list) {
             boolean flag = true;
             Socket socket = null;
             try {
-                System.out.println("Port:"+info.getPort());
-                //socket = new Socket(info.getIp(), info.getPort());
+//                iLeoleoService.remove(new QueryWrapper<Leoleo>().eq("IDsat",info.getIDsat()));
                 socket = new Socket();
                 socket.connect(new InetSocketAddress(info.getIp(), info.getPort()), 3000); // 设置连接超时时间为3秒
             } catch (Exception e) {
-                System.out.println("yesyes");
                 flag = false;
                 String iDsat = info.getIDsat();   //之前是否存在认证状态 存在就删除，不存在
                 QueryWrapper qw = new QueryWrapper<>();
@@ -97,7 +93,7 @@ public class LeoleoController {
                 List<Leoleo> leoleo = iLeoleoService.list(qw);
                 Leoleo leoleoa = new Leoleo();
                 leoleoa.setIDsat(iDsat);
-                leoleoa.setSt(3);//设置状态 为3
+                leoleoa.setSt(0);//设置状态 为
                 leoleoa.setLog("目标主机未开启\n认证失败\n");
                 if(leoleo!=null&&leoleo.size()==1){
 //                    iLeoleoService.removeById(iDsat);
@@ -107,11 +103,7 @@ public class LeoleoController {
                     leoleoa.setSsid(leoleo.get(0).getSsid());
                     iLeoleoService.remove(qw);
                 }
-                System.out.println("leoleoa"+leoleoa);
-
-                System.out.println("beforeileoleoservice"+iLeoleoService.list());
                 iLeoleoService.save(leoleoa);
-                System.out.println("ileoleoservice"+iLeoleoService.list());
                 latch.countDown();
             }
             if(flag) {
