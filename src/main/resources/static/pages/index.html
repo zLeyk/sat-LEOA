@@ -140,22 +140,26 @@
                                       :data="tableData" max-height="690px" border style="width: 100%">
                                 <el-table-column prop="idsat" label="卫星身份信息(IDsat)" width="160">
                                 </el-table-column>
-                                <el-table-column prop="ssid" label="卫星广播身份(SSID)" width="220">
+                                <el-table-column prop="ssid" label="卫星广播身份(SSID)" width="150">
                                 </el-table-column>
-                                <el-table-column prop="tida" label="卫星临时身份A(Tida)" width="220">
+                                <el-table-column prop="tidSrc" label="源卫星临时身份(TidSrc)" width="180">
                                 </el-table-column>
-                                <el-table-column prop="tidb" label="卫星临时身份B(Tidb)" width="220">
+                                <el-table-column prop="tidDst" label="目标卫星临时身份(TidDst)" width="190">
                                 </el-table-column>
-                                <el-table-column prop="st" label="认证状态(ST)" width="220">
+                                <el-table-column prop="st" label="认证状态(ST)" width="110">
                                     <template scope="scope">
-                                        <span v-if="scope.row.st === 0 || scope.row.st === '0'" style="color: #F56C6C;">未认证</span>
+                                        <span v-if="scope.row.st === 0 || scope.row.st === '0'" style="color: #F56C6C;">认证失败</span>
                                         <span v-else-if="scope.row.st === 1 || scope.row.st === '1'" style="color: #67C23A">已认证</span>
+                                        <span v-else-if="scope.row.st === 2 || scope.row.st === '2'" style="color: #E6A23C">未注册</span>
+                                        <span v-else-if="scope.row.st === 3 || scope.row.st === '3'" style="color: #909399">未连接</span>
                                         <span v-else>--</span>
                                     </template>
                                 </el-table-column>
                                 <el-table-column prop="token" label="认证令牌(Token)" width="220">
                                 </el-table-column>
-                                <el-table-column align="center">
+                                <el-table-column prop="log" label="认证日志(Log)">
+                                </el-table-column>
+                                <el-table-column align="center" width="180">
                                     <template slot="header" slot-scope="scope">
                                         <el-input v-model="search" size="mini" placeholder="输入IDsat搜索" />
                                     </template>
@@ -167,16 +171,24 @@
                                                     <el-input
                                                             v-model="edit_temp_form.cur_table_data.ssid"></el-input>
                                                 </el-form-item>
-                                                <el-form-item required label="卫星临时身份A(Tida)">
+                                                <el-form-item required label="源卫星临时身份(TidSrc)">
                                                     <el-input
-                                                            v-model="edit_temp_form.cur_table_data.tida"></el-input>
+                                                            v-model="edit_temp_form.cur_table_data.tidSrc"></el-input>
                                                 </el-form-item>
-                                                <el-form-item required label="卫星临时身份B(Tidb)">
+                                                <el-form-item required label="目标卫星临时身份(TidDst)">
                                                     <el-input
-                                                            v-model="edit_temp_form.cur_table_data.tidb"></el-input>
+                                                            v-model="edit_temp_form.cur_table_data.tidDst"></el-input>
                                                 </el-form-item>
                                                 <el-form-item required label="认证状态(ST)">
-                                                    <el-input v-model="edit_temp_form.cur_table_data.st"></el-input>
+<!--                                                    <el-input v-model="edit_temp_form.cur_table_data.st"></el-input>-->
+                                                    <el-select v-model="edit_temp_form.cur_table_data.st" placeholder="请选择认证状态">
+                                                        <el-option v-for="item in auth_status" :key="item.value" :label="item.label"
+                                                                   :value="item.value">
+                                                            <span style="float: left">{{ item.label }}</span>
+                                                            <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value
+                                                                }}</span>
+                                                        </el-option>
+                                                    </el-select>
                                                 </el-form-item>
                                                 <el-form-item required label="认证令牌(Token)">
                                                     <el-input
@@ -238,7 +250,25 @@
                 cur_idx: 0,
                 cur_table_data: {}
             },
-            tableData: []
+            tableData: [],
+            auth_status: [
+                {
+                    value: 0,
+                    label: '认证失败'
+                },
+                {
+                    value: 1,
+                    label: '已认证'
+                },
+                {
+                    value: 2,
+                    label: '未注册'
+                },
+                {
+                    value: 3,
+                    label: '未连接'
+                }
+            ]
         },
         watch: {
             cur_page: {
