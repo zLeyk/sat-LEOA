@@ -122,13 +122,11 @@ public class LeoleoController {
         List<Leoleo> result = iLeoleoService.list();
         System.out.println("result:"+result);
         ArrayList<Leoleo> re = new ArrayList<>();
-        for (Leoleo le:
-                result) {
-            if(!le.getLog().equals("目的卫星认证成功")) {
+        for (Leoleo le: result) {
+            if(!le.getLog().equals("目的卫星")&&!le.getLog().equals("三方认证失败")){
                 re.add(le);
             }
         }
-        System.out.println("rererererer"+re);
         return re;
     }
 

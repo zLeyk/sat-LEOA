@@ -159,29 +159,7 @@ public class LeoLeoAuthTask implements Runnable {
                     try {
                         RE_Src = ds.DESdecode(E_Src, preleo.getCk());
                     } catch (Exception e) {
-//                    log += "认证失败\n";
-//                    try {
-//                        if (!f) {
-//                            sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
-//                            PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
-//                            pst.setString(1, DstIDsat);
-//                            pst.setInt(2, 0);
-//                            pst.setString(3, log);
-//                            pst.executeUpdate();
-//                        } else {
-//                            sql = "UPDATE leoleo set ST = 0 , log = '" + log + "'" + "WHERE IDsat = '" + DstIDsat + "'";
-//                            boolean executeleo = statement.execute(sql);
-//                        }
-//
-//                    } catch (SQLException ee) {
-//                        ee.printStackTrace();
-//                    }
-//
-//                    try {
-//                        client.close();
-//                    } catch (IOException ex) {
-//
-//                    }
+
                     }
                     if (RE_Src != null && !RE_Src.equals("")) {
 
@@ -295,28 +273,6 @@ public class LeoLeoAuthTask implements Runnable {
                                                     sb.append(temp);
                                                 }
                                             } catch (Exception e) {
-//                                        log += "认证失败";
-//                                        try {
-//                                            if (!f) {
-//                                                sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
-//                                                PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
-//                                                pst.setString(1, DstIDsat);
-//                                                pst.setInt(2, 0);
-//                                                pst.setString(3, log);
-//                                                pst.executeUpdate();
-//                                            } else {
-//                                                sql = "UPDATE leoleo set ST = 0 , log = '" + log + "' WHERE IDsat = '" + DstIDsat + "'";
-//                                                int executeleo = statement.executeUpdate(sql);
-//                                                statement.close();
-//                                            }
-//
-//                                        } catch (SQLException ee) {
-//                                            ee.printStackTrace();
-//                                        }
-//                                        try {
-//                                            client.close();
-//                                        } catch (IOException ex) {
-//                                        }
                                             }
 
                                             String RES = sb.toString();
