@@ -66,20 +66,21 @@ public class TccLeoLeoAuthTask implements Runnable {
 
         //目的卫星和地面通信发送的信息 包括  自身的编号 ，源卫星的广播ID
         String msg = preleo.getIDsat()+","+SSID.toString() +","+ t;
+        String msgencode = null;
         try {
-            msg = ds.DESencode(msg,preleo.getK());
+            msgencode = ds.DESencode(msg,preleo.getK());
         } catch (Exception e) {
         }
         if(msg!= null && !msg.equals("")) {   ///密钥错误 会继续执行 但是 msg为空
             System.out.println("加密信息:" + msg);
-            msg = "1," + msg;
-            System.out.println("星地认证向TCC发送信息:" + msg);
+            msgencode = "1," + msgencode;
+            System.out.println("星地认证向TCC发送信息:" + msgencode);
             //向Tcc发送消息
             Writer writer = null;
             log += "卫星" + preleo.getIDsat() + "向地面发送信息:" + msg + "\n";
             try {
                 writer = new OutputStreamWriter(client.getOutputStream(), "GBK");
-                writer.write(msg);
+                writer.write(msgencode);
                 writer.write("eof\n");
                 writer.flush();
             } catch (Exception e) {
@@ -145,6 +146,12 @@ public class TccLeoLeoAuthTask implements Runnable {
                 return s + "," + log;
             }
         }else {
+            System.out.println("密钥K错误");
+            try {
+                client.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             return "目的卫星密钥K错误\n";
         }
     }

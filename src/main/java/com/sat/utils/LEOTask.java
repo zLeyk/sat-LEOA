@@ -47,12 +47,10 @@ public class LEOTask implements Runnable {
         BufferedReader reader = null;
         BufferedWriter writer = null;
         StringBuilder sb = new StringBuilder();
+        String clientIP = socket.getInetAddress().getHostAddress();  //被认证卫星IP
+        IptablesManager iptablesManager = new IptablesExample();
         String temp;
         int index;
-        //  获得收到的信息  写到的时候在处理
-
-        //socket.setSoTimeout(10*10000);
-
 
         //设置超时间为10秒
         try {
@@ -149,9 +147,6 @@ public class LEOTask implements Runnable {
             log += "卫星端校验数据\n";
             //如果和地面通信失败  关闭   和地面通信 Leo发送信息 Tcc接收信息 在TccLeoLeoAuthTask处理 接收的信息 在这个类处理
             // 如果前两步出现错误，tccmsg的log里面会出现认证失败，tccmsg包括返回信息和认证流程，如果认证失败 只存在认证流程
-            System.out.println("tccmsgtccmsgtccmsg");
-            System.out.println(tccmsg);
-            System.out.println("------------------------------");
             if(tccmsg.contains("失败") || tccmsg.contains("非法")||tccmsg.contains("错误")){
                 if(tccmsg.contains("密钥K错误")){
                     log += "目的卫星身份保护密钥错误\n目的卫星认证失败\n";
@@ -170,6 +165,7 @@ public class LEOTask implements Runnable {
                     msg = "和地面通信失败\n";
                 }
                 sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
+//                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                 statement.execute(sql);
                 try {
                     writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "GBK"));
@@ -204,6 +200,7 @@ public class LEOTask implements Runnable {
                             log += "会话密钥错误\n目的卫星认证失败\n";
                             sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                             statement.execute(sql);
+                            //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                             socket.close();
                         } catch (IOException e) {
                         }
@@ -224,6 +221,7 @@ public class LEOTask implements Runnable {
                             sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                             statement.execute(sql);
                             System.out.println("认证失败");
+                            //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                             statement.close();
                             connection.close();
                             try {
@@ -246,8 +244,6 @@ public class LEOTask implements Runnable {
                             } catch (Exception e) {
                             }
                             System.out.println("目的卫星向源卫星发送信息:" + msg_Src);
-                            //
-
                             log += "卫星"+preleo.getIDsat() +"向卫星"+IDsat_Src_C+"发送数据:"+msg_Src+"\n";
                             log += "Step6:\n";
                             log += "卫星"+IDsat_Src_C+"校验数据\n";
@@ -273,7 +269,6 @@ public class LEOTask implements Runnable {
                             }
                             //收到源卫星的信息
                             String msgsrc = sb.toString();
-
                             if (msgsrc!=null && !msgsrc.equals("")) {  // 如果收到了信息
                                 log += "卫星"+IDsat_Src_C+"接收到数据:"+msgsrc+"\n";
                                 String R = msgsrc.split(",")[0];
@@ -284,7 +279,6 @@ public class LEOTask implements Runnable {
                                 try {
                                     C_K = ds.DESencode(R, preleo.getMainKey());
                                 } catch (Exception e) {
-
                                 }
                                 if (C_K!=null && !C_K.equals("")) {   // 防止计算会话错误
                                     //System.out.println(C_K);
@@ -350,6 +344,7 @@ public class LEOTask implements Runnable {
                                                         log += "校验成功\n";
                                                         log += "目的卫星认证成功\n";
                                                         String IDsat_Src = ID_Src;
+                                                        // iptablesManager.acceptIcmp(clientIP);//认证成功
                                                         try {
                                                             sql = "insert into leoleo(IDsat,SSID,TidSrc,TidDst,st,token,log) values(?,?,?,?,?,?,?) ";
                                                             PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -372,6 +367,7 @@ public class LEOTask implements Runnable {
                                                     log += "校验不通过\n目的卫星认证失败\n";
                                                     sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                                                     statement.execute(sql);
+                                                    //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                                     try {
                                                         socket.close();
                                                         connection.close();
@@ -379,11 +375,11 @@ public class LEOTask implements Runnable {
 
                                                     }
                                                 }
-
                                             }else {
                                                 log += "校验不通过\n目的卫星认证失败\n";
                                                 sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                                                 statement.execute(sql);
+                                                //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                                 try {
                                                     socket.close();
                                                     connection.close();
@@ -395,6 +391,7 @@ public class LEOTask implements Runnable {
                                             log += "主密钥错误\n目的卫星认证失败\n";
                                             sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                                             statement.execute(sql);
+                                            //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                             try {
                                                 writer.close();
                                                 connection.close();
@@ -414,6 +411,7 @@ public class LEOTask implements Runnable {
                                         }
                                     }else {
                                         log += "解密失败\n目的卫星认证失败\n";
+                                        //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                         sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                                         statement.execute(sql);
                                         try {
@@ -426,6 +424,7 @@ public class LEOTask implements Runnable {
                                     log += "解密失败\n目的卫星认证失败\n";
                                     sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                                     statement.execute(sql);
+                                    //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                     try {
                                         socket.close();
                                         connection.close();
@@ -438,6 +437,7 @@ public class LEOTask implements Runnable {
                                 log += "目的卫星认证失败\n";
                                 sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                                 statement.execute(sql);
+                                //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                 try {
                                     socket.close();
 
@@ -452,6 +452,7 @@ public class LEOTask implements Runnable {
                     log += "会话密钥错误\n目的卫星认证失败\n";
                     sql = "insert into leoleo(IDsat,SSID,ST,log) values ('"+IDsat_Src_C+"',"+SSID+",0,'"+log+"')";
                     statement.execute(sql);
+                    //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                     try {
                         String msg = "3,目的卫星会话密钥错误";
                         writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "GBK"));

@@ -56,8 +56,8 @@ public class LeoLeoAuthTask implements Runnable {
         String SrcIDsat = preleo.getIDsat();
         //加密工具 DES 密钥长度必须8的倍数 这个类要求必须8位
         DESUtils ds = new DESUtils();
-
-
+        String clientIP = client.getInetAddress().getHostAddress();  //被认证卫星IP
+        IptablesManager iptablesManager = new IptablesExample();
         //Step1 第一步 源卫星发送自己的广播编号到目的卫星
         try {
             client.setSoTimeout(10 * 1000);
@@ -90,14 +90,15 @@ public class LeoLeoAuthTask implements Runnable {
                 sb.append(temp);
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         //设置超时间为10秒
-
         String s = sb.toString();
         if(s.equals("")){    //没有接收到信息，可能的情况(1.三方认证目的卫星和地面卫星通信失败;2.)
             log += "认证失败\n";
             sql = "delete from leoleo where IDsat = '" + DstIDsat + "'";
             statement.execute(sql);
+          //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
             try {
                     sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                     PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -111,7 +112,6 @@ public class LeoLeoAuthTask implements Runnable {
             try {
                 client.close();
             } catch (IOException ex) {
-
             }
         }
         //System.out.println(s);
@@ -125,7 +125,6 @@ public class LeoLeoAuthTask implements Runnable {
                 log += "卫星"+DstIDsat+"和地面通信\n";
                 if (s.contains("错误") || s.contains("非法") || s.contains("失败")) {
                       log += s.split(",")[1];
-                    System.out.println("enterenterenter");
                     System.out.println(log);
                     log += "\n";
                       if(s.contains("密钥K错误") || s.contains("目的卫星会话密钥错误")){
@@ -133,6 +132,7 @@ public class LeoLeoAuthTask implements Runnable {
                       }else
                           log += "三方认证失败\n";
                     sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
+                    //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
                     PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
                     pst.setString(1, DstIDsat);
                     pst.setInt(2, 0);
@@ -166,18 +166,13 @@ public class LeoLeoAuthTask implements Runnable {
                         if (RE_Src.split(",").length != 7) {
                             log += "校验信息失败\n";
                             log += "认证失败\n";
-                            try {
                                 sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                                 PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
                                 pst.setString(1, DstIDsat);
                                 pst.setInt(2, 0);
                                 pst.setString(3, log);
                                 pst.executeUpdate();
-
-
-                            } catch (SQLException ee) {
-                                ee.printStackTrace();
-                            }
+                            //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
                             try {
                                 client.close();
                             } catch (IOException ex) {
@@ -256,7 +251,6 @@ public class LeoLeoAuthTask implements Runnable {
                                             try {
                                                 client.setSoTimeout(10 * 1000);
                                             } catch (SocketException e) {
-                                                throw new RuntimeException(e);
                                             }
 
                                             log += "Step4\n";
@@ -289,8 +283,8 @@ public class LeoLeoAuthTask implements Runnable {
                                                 if (RES.equals(XRES)) {
                                                     System.out.println("三方认证成功");
                                                     log += "认证成功\n";
+                                           //         iptablesManager.acceptIcmp(clientIP);//认证成功
                                                     //三方认证成功可以插入数据了
-                                                    System.out.println("LEO-B向卫星认证表插入三方认证数据");
                                                     String ID_Dst = ID_Dst_ESrc;
                                                     int ssid_Dst = Integer.valueOf(SSID_Dst);
                                                     try {
@@ -325,6 +319,7 @@ public class LeoLeoAuthTask implements Runnable {
                                                 } else {
                                                     log += "响应数据和预置响应数据不相等！\n";
                                                     log += "认证失败\n";
+                                                    // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                                     try {
                                                         sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                                                         PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -363,6 +358,7 @@ public class LeoLeoAuthTask implements Runnable {
                                             } else {
                                                 log += "卫星" + SrcIDsat + "未接收到数据\n";
                                                 log += "认证失败\n";
+                                                // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                                 try {
                                                     sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                                                     PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -388,6 +384,7 @@ public class LeoLeoAuthTask implements Runnable {
                                         } else {
                                             log += "主密钥错误\n";
                                             log += "认证失败\n";
+                                            // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                             try {
                                                 sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                                                 PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -412,6 +409,7 @@ public class LeoLeoAuthTask implements Runnable {
                                     } else {
                                         log += "密钥错误\n";
                                         log += "认证失败\n";
+                                        // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                         try {
                                             sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                                             PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -437,6 +435,7 @@ public class LeoLeoAuthTask implements Runnable {
                                 } else {
                                     log += "卫星" + SrcIDsat + "主密钥错误\n";
                                     log += "认证失败\n";
+                                    // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                     try {
                                         sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                                         PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -461,6 +460,7 @@ public class LeoLeoAuthTask implements Runnable {
                             } else {
                                 log += "校验失败\n";
                                 log += "认证失败\n";
+                                // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                 try {
                                     sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                                     PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -486,6 +486,7 @@ public class LeoLeoAuthTask implements Runnable {
                     } else {
                         log += "密钥错误\n";
                         log += "认证失败\n";
+                        // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                         try {
                             sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                             PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -593,6 +594,7 @@ public class LeoLeoAuthTask implements Runnable {
                                 } else {
                                     log += "临时身份或Token校验不通过\n";
                                     log += "认证失败\n";
+                                    // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                     try {
                                         sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
                                         statement.execute(sql);
@@ -619,6 +621,7 @@ public class LeoLeoAuthTask implements Runnable {
                                 log += "卫星" + DstIDsat + "校验数据\n";
                                 log += "校验不通过\n";
                                 log += "认证失败\n";
+                                // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                 try {
                                     sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
                                     statement.execute(sql);
@@ -637,6 +640,7 @@ public class LeoLeoAuthTask implements Runnable {
                         } else {
                             log += "临时身份或Token校验不通过\n";
                             log += "认证失败\n";
+                            // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                             try {
                                 sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
                                 statement.execute(sql);
@@ -655,6 +659,7 @@ public class LeoLeoAuthTask implements Runnable {
                     } else {
                         log += "Token为空！\n";
                         log += "认证失败\n";
+                        //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
                         try {
                             sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
                             statement.execute(sql);
