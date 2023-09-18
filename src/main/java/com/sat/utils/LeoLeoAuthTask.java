@@ -90,28 +90,29 @@ public class LeoLeoAuthTask implements Runnable {
                 sb.append(temp);
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
         //设置超时间为10秒
+
         String s = sb.toString();
         if(s.equals("")){    //没有接收到信息，可能的情况(1.三方认证目的卫星和地面卫星通信失败;2.)
             log += "认证失败\n";
             sql = "delete from leoleo where IDsat = '" + DstIDsat + "'";
             statement.execute(sql);
-          //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
+            //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
             try {
-                    sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
-                    PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
-                    pst.setString(1, DstIDsat);
-                    pst.setInt(2, 0);
-                    pst.setString(3, log);
-                    pst.executeUpdate();
+                sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
+                PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
+                pst.setString(1, DstIDsat);
+                pst.setInt(2, 0);
+                pst.setString(3, log);
+                pst.executeUpdate();
             } catch (SQLException ee) {
                 ee.printStackTrace();
             }
             try {
                 client.close();
             } catch (IOException ex) {
+
             }
         }
         //System.out.println(s);
@@ -124,13 +125,13 @@ public class LeoLeoAuthTask implements Runnable {
                 log += "三方认证\n";
                 log += "卫星"+DstIDsat+"和地面通信\n";
                 if (s.contains("错误") || s.contains("非法") || s.contains("失败")) {
-                      log += s.split(",")[1];
+                    log += s.split(",")[1];
                     System.out.println(log);
                     log += "\n";
-                      if(s.contains("密钥K错误") || s.contains("目的卫星会话密钥错误")){
-                          log += "认证失败\n";
-                      }else
-                          log += "三方认证失败\n";
+                    if(s.contains("密钥K错误") || s.contains("会话密钥错误")){
+                        log += "认证失败\n";
+                    }else
+                        log += "三方认证失败\n";
                     sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
                     //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
                     PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
@@ -166,12 +167,12 @@ public class LeoLeoAuthTask implements Runnable {
                         if (RE_Src.split(",").length != 7) {
                             log += "校验信息失败\n";
                             log += "认证失败\n";
-                                sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
-                                PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
-                                pst.setString(1, DstIDsat);
-                                pst.setInt(2, 0);
-                                pst.setString(3, log);
-                                pst.executeUpdate();
+                            sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
+                            PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
+                            pst.setString(1, DstIDsat);
+                            pst.setInt(2, 0);
+                            pst.setString(3, log);
+                            pst.executeUpdate();
                             //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
                             try {
                                 client.close();
@@ -186,7 +187,7 @@ public class LeoLeoAuthTask implements Runnable {
                             Long tt = Long.parseLong(TT_ESrc);
                             //当前时间
                             Long ct = System.currentTimeMillis();
-                            if ((ct - tt) < 2000 && SSID_Dst.equals(SSID_Dst_ESrc) && TID_Dst.equals(TID_Dst_ESrc)) {
+                            if ((ct - tt) < 10000 && SSID_Dst.equals(SSID_Dst_ESrc) && TID_Dst.equals(TID_Dst_ESrc)) {
 
                                 Randomget random1 = new Randomget();
                                 String R = random1.getRandom1(8);
@@ -283,7 +284,7 @@ public class LeoLeoAuthTask implements Runnable {
                                                 if (RES.equals(XRES)) {
                                                     System.out.println("三方认证成功");
                                                     log += "认证成功\n";
-                                           //         iptablesManager.acceptIcmp(clientIP);//认证成功
+                                                    //         iptablesManager.acceptIcmp(clientIP);//认证成功
                                                     //三方认证成功可以插入数据了
                                                     String ID_Dst = ID_Dst_ESrc;
                                                     int ssid_Dst = Integer.valueOf(SSID_Dst);
@@ -508,118 +509,92 @@ public class LeoLeoAuthTask implements Runnable {
                         }
                     }
                 }
-                } else if (s.split(",")[0].equals("2")) {
+            } else if (s.split(",")[0].equals("2")) {
 
-                    log += "两方认证\n";
-                    log += "卫星" + DstIDsat + "发送信息:" + s + "\n";
-                    //二方认证 Step2 获得来自A的数据，根据时间戳，A临时身份，Token，比较，并将B自身数据发送给A
-                    System.out.println("Step3:");
-                    log += "Step3:\n";
-                    System.out.println("LEO-B接收LEO-A信息：" + s);
-                    log += "卫星" + SrcIDsat + "接收信息:" + s + "\n";
-                    String T = s.split(",")[1];
-                    String ID_Dst = s.split(",")[2];  // 目的卫星的ID
-                    String TID_Dst = s.split(",")[3] + "," + s.split(",")[4]; // 目的卫星的临时身份
-                    String Token = s.split(",")[5] + "," + s.split(",")[6] + "," + s.split(",")[7] + "," + s.split(",")[8]; //Token
+                log += "两方认证\n";
+                log += "卫星" + DstIDsat + "发送信息:" + s + "\n";
+                //二方认证 Step2 获得来自A的数据，根据时间戳，A临时身份，Token，比较，并将B自身数据发送给A
+                System.out.println("Step3:");
+                log += "Step3:\n";
+                System.out.println("LEO-B接收LEO-A信息：" + s);
+                log += "卫星" + SrcIDsat + "接收信息:" + s + "\n";
+                String T = s.split(",")[1];
+                String ID_Dst = s.split(",")[2];  // 目的卫星的ID
+                String TID_Dst = s.split(",")[3] + "," + s.split(",")[4]; // 目的卫星的临时身份
+                String Token = s.split(",")[5] + "," + s.split(",")[6] + "," + s.split(",")[7] + "," + s.split(",")[8]; //Token
 
-                    // 查找自身认证表中的存的Idsat为A的那一行临时身份A和Token，以及临时身份B
-                    sql = "select * from leoleo where IDsat = '" + ID_Dst + "'";
-                    resultSet = statement.executeQuery(sql);
-                    while (resultSet.next()) {
-                        leoleo.setIDsat(resultSet.getString(1));
-                        leoleo.setSsid(resultSet.getInt(2));
-                        leoleo.setTidSrc(resultSet.getString(3));
-                        leoleo.setTidDst(resultSet.getString(4));
-                        leoleo.setSt(resultSet.getInt(5));
-                        leoleo.setToken(resultSet.getString(6));
-                    }
+                // 查找自身认证表中的存的Idsat为A的那一行临时身份A和Token，以及临时身份B
+                sql = "select * from leoleo where IDsat = '" + ID_Dst + "'";
+                resultSet = statement.executeQuery(sql);
+                while (resultSet.next()) {
+                    leoleo.setIDsat(resultSet.getString(1));
+                    leoleo.setSsid(resultSet.getInt(2));
+                    leoleo.setTidSrc(resultSet.getString(3));
+                    leoleo.setTidDst(resultSet.getString(4));
+                    leoleo.setSt(resultSet.getInt(5));
+                    leoleo.setToken(resultSet.getString(6));
+                }
 
-                    resultSet.close();
-                    //System.out.println(leoleo.getTida());
+                resultSet.close();
+                //System.out.println(leoleo.getTida());
 
-                    //比较时间戳和临时身份和Token，符合条件继续认证，不然认证失败
-                    Long t = Long.parseLong(T);
-                    //当前时间
-                    Long ct = System.currentTimeMillis();
-                    //(ct-t)<2000 &&
-                    if (leoleo.getToken() != null) {
-                        if (TID_Dst.equals(leoleo.getTidDst()) && Token.equals(leoleo.getToken())) {
-                            String newmsg_Src = leoleo.getTidSrc();
-                            System.out.println("LEO-B校验数据");
-                            try {
-                                writer.write(newmsg_Src);
-                                writer.write("eof\n");
-                                writer.flush();
-                            } catch (Exception e) {
+                //比较时间戳和临时身份和Token，符合条件继续认证，不然认证失败
+                Long t = Long.parseLong(T);
+                //当前时间
+                Long ct = System.currentTimeMillis();
+                //(ct-t)<2000 &&
+                if (leoleo.getToken() != null) {
+                    if (TID_Dst.equals(leoleo.getTidDst()) && Token.equals(leoleo.getToken())) {
+                        String newmsg_Src = leoleo.getTidSrc();
+                        System.out.println("LEO-B校验数据");
+                        try {
+                            writer.write(newmsg_Src);
+                            writer.write("eof\n");
+                            writer.flush();
+                        } catch (Exception e) {
+                        }
+                        log += "卫星" + SrcIDsat + "校验数据\n";
+                        System.out.println("LEO-B向LEO-A发送信息：" + newmsg_Src);
+                        log += "卫星" + SrcIDsat + "发送数据:" + newmsg_Src + "\n";
+
+
+                        sb.setLength(0);
+                        //设置超时间为10秒
+                        try {
+                            client.setSoTimeout(10 * 1000);
+                            while ((temp = reader.readLine()) != null) {
+                                if ((index = temp.indexOf("eof")) != -1) {
+                                    sb.append(temp.substring(0, index));
+                                    break;
+                                }
+                                sb.append(temp);
                             }
-                            log += "卫星" + SrcIDsat + "校验数据\n";
-                            System.out.println("LEO-B向LEO-A发送信息：" + newmsg_Src);
-                            log += "卫星" + SrcIDsat + "发送数据:" + newmsg_Src + "\n";
+                        } catch (SocketException e) {
+                            throw new RuntimeException(e);
+                        } catch (IOException e) {
 
+                        }
 
-                            sb.setLength(0);
-                            //设置超时间为10秒
-                            try {
-                                client.setSoTimeout(10 * 1000);
-                                while ((temp = reader.readLine()) != null) {
-                                    if ((index = temp.indexOf("eof")) != -1) {
-                                        sb.append(temp.substring(0, index));
-                                        break;
-                                    }
-                                    sb.append(temp);
-                                }
-                            } catch (SocketException e) {
-                                throw new RuntimeException(e);
-                            } catch (IOException e) {
-
-                            }
-
-                            // 三方认证 Step 6  比较RES和XRES若一致认证成功，
-                            String Res = sb.toString();
-                            if (Res != null && !Res.equals("")) {
-                                if (Res.equals("YES")) {
-                                    log += "卫星" + DstIDsat + "校验数据\n";
-                                    log += "认证成功\n";
-                                    //改自身的数据
-                                    System.out.println("两方认证成功");
-                                    try {
-                                        //查询语句
-                                        sql = "UPDATE leoleo set ST = 1 , log = '" + log + "'" + "WHERE IDsat = '" + ID_Dst + "'";
-                                        int executeleo = statement.executeUpdate(sql);
-                                        statement.close();
-                                    } catch (SQLException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                } else {
-                                    log += "临时身份或Token校验不通过\n";
-                                    log += "认证失败\n";
-                                    // iptablesManager.DacceptIcmp(clientIP);//封禁ip
-                                    try {
-                                        sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
-                                        statement.execute(sql);
-                                        sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
-                                        PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
-                                        pst.setString(1, DstIDsat);
-                                        pst.setInt(2, 0);
-                                        pst.setString(3, log);
-                                        pst.executeUpdate();
-                                        pst.close();
-
-                                    } catch (SQLException ee) {
-                                        ee.printStackTrace();
-                                    }
-                                }
-                                statement.close();
-                                connection.close();
-                                try {
-                                    client.close();
-                                } catch (IOException e) {
-
-                                }
-                            } else {
+                        // 三方认证 Step 6  比较RES和XRES若一致认证成功，
+                        String Res = sb.toString();
+                        if (Res != null && !Res.equals("")) {
+                            if (Res.equals("YES")) {
                                 log += "卫星" + DstIDsat + "校验数据\n";
-                                log += "校验不通过\n";
+                                log += "认证成功\n";
+                                //改自身的数据
+                                System.out.println("两方认证成功");
+                                try {
+                                    //查询语句
+                                    sql = "UPDATE leoleo set ST = 1 , log = '" + log + "'" + "WHERE IDsat = '" + ID_Dst + "'";
+                                    int executeleo = statement.executeUpdate(sql);
+//                                    iptablesManager.acceptIcmp(clientIP);//封禁ip
+                                    statement.close();
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+
+                            } else {
+                                log += "临时身份或Token校验不通过\n";
                                 log += "认证失败\n";
                                 // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                                 try {
@@ -637,8 +612,16 @@ public class LeoLeoAuthTask implements Runnable {
                                     ee.printStackTrace();
                                 }
                             }
+                            statement.close();
+                            connection.close();
+                            try {
+                                client.close();
+                            } catch (IOException e) {
+
+                            }
                         } else {
-                            log += "临时身份或Token校验不通过\n";
+                            log += "卫星" + DstIDsat + "校验数据\n";
+                            log += "校验不通过\n";
                             log += "认证失败\n";
                             // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                             try {
@@ -657,9 +640,9 @@ public class LeoLeoAuthTask implements Runnable {
                             }
                         }
                     } else {
-                        log += "Token为空！\n";
+                        log += "临时身份或Token校验不通过\n";
                         log += "认证失败\n";
-                        //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
+                        // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                         try {
                             sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
                             statement.execute(sql);
@@ -675,7 +658,26 @@ public class LeoLeoAuthTask implements Runnable {
                             ee.printStackTrace();
                         }
                     }
+                } else {
+                    log += "Token为空！\n";
+                    log += "认证失败\n";
+                    //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
+                    try {
+                        sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
+                        statement.execute(sql);
+                        sql = "insert into leoleo(IDsat,st,log) values(?,?,?)";
+                        PreparedStatement pst = connection.prepareStatement(sql);//用来执行SQL语句查询，对sql语句进行预编译处理
+                        pst.setString(1, DstIDsat);
+                        pst.setInt(2, 0);
+                        pst.setString(3, log);
+                        pst.executeUpdate();
+                        pst.close();
+
+                    } catch (SQLException ee) {
+                        ee.printStackTrace();
+                    }
                 }
+            }
 
         }
     }

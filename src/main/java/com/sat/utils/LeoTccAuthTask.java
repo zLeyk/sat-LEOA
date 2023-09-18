@@ -2,11 +2,9 @@ package com.sat.utils;
 
 import com.sat.satquery.entity.Preleo;
 
-import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
-import java.security.NoSuchAlgorithmException;
 
 //星地认证流程
 public class LeoTccAuthTask implements Runnable {
@@ -159,8 +157,8 @@ public class LeoTccAuthTask implements Runnable {
                     System.out.println("加密失败，工作密钥不正确");
                     System.out.println("XMAC"+XMAC);
                 }
-                if (!XMAC.equals("")) {
-                    if ((ct - Long.parseLong(Tre)) > 20000 || !(XMAC.equals(MAC))) {
+                if (XMAC!=null && !XMAC.equals("")) {
+                    if ((ct - Long.parseLong(Tre)) > 10000 || !(XMAC.equals(MAC))) {
                         System.out.println("时间不符合新鲜性要求，或者消息校验码不正确");
                         try {
                             writer.close();

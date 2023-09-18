@@ -123,7 +123,7 @@ public class LeoleoController {
         System.out.println("result:"+result);
         ArrayList<Leoleo> re = new ArrayList<>();
         for (Leoleo le: result) {
-            if(!le.getLog().equals("目的卫星")&&!le.getLog().equals("三方认证失败")){
+            if(!le.getLog().contains("目的卫星")&&!le.getLog().contains("三方认证失败")){
                 re.add(le);
             }
         }

@@ -71,7 +71,7 @@ public class TccLeoLeoAuthTask implements Runnable {
             msgencode = ds.DESencode(msg,preleo.getK());
         } catch (Exception e) {
         }
-        if(msg!= null && !msg.equals("")) {   ///密钥错误 会继续执行 但是 msg为空
+        if(msgencode!= null && !msgencode.equals("")) {   ///密钥错误 会继续执行 但是 msg为空
             System.out.println("加密信息:" + msg);
             msgencode = "1," + msgencode;
             System.out.println("星地认证向TCC发送信息:" + msgencode);
