@@ -467,7 +467,7 @@ public class LEOTask implements Runnable {
                         statement.execute(sql);
                         //                iptablesManager.DacceptIcmp(clientIP);//封禁ip
                         try {
-                            String msg = "3,目的卫星会话密钥错误";
+                            String msg = "3,会话密钥错误";
                             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "GBK"));
                             writer.write(msg);
                             writer.write("eof\n");
@@ -484,12 +484,19 @@ public class LEOTask implements Runnable {
                 //当前时间
                 Long ct1 = System.currentTimeMillis();
                 String ct = Long.toString(ct1);
-                System.out.println(preleo);
-                System.out.println(leoleo);
+                String leoTid = "a,a";
+                String leoToken = "a,a,a,a";
+                if(!leoleo.getTidDst().equals("")){
+                    leoTid = leoleo.getTidDst();
+                }
+                if(!leoleo.getToken().equals("")){
+                    leoToken = leoleo.getToken();
+                }
+                System.out.println("leoTid"+leoTid);
+                System.out.println("leoToken"+leoToken);
                 //生成新的请求
-                String msg_Dst = "2" + "," + ct + "," + preleo.getIDsat() + "," + leoleo.getTidDst() + "," + leoleo.getToken();
-                //System.out.println(msg_B);
-
+                String msg_Dst = "2" + "," + ct + "," + preleo.getIDsat() + "," + leoTid + "," + leoToken;
+                System.out.println("msg_Length"+msg_Dst.length());
                 //将信息发送给B
                 try {
                     writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));

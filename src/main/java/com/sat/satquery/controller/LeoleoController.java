@@ -58,7 +58,7 @@ public class LeoleoController {
     }
 
     @DeleteMapping("/deleteLeoLeoByIDsat/{idsat}")
-    public boolean deleteLeoLeoByIDsat(@PathVariable int idsat) {
+    public boolean deleteLeoLeoByIDsat(@PathVariable String idsat) {
         return iLeoleoService.removeById(idsat);
     }
 
@@ -127,6 +127,7 @@ public class LeoleoController {
                 re.add(le);
             }
         }
+        System.out.println("rererere"+re);
         return re;
     }
 
