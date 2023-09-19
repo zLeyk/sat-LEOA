@@ -486,10 +486,10 @@ public class LEOTask implements Runnable {
                 String ct = Long.toString(ct1);
                 String leoTid = "a,a";
                 String leoToken = "a,a,a,a";
-                if(!leoleo.getTidDst().equals("")){
+                if(!leoleo.getTidDst().equals("")&&leoleo.getTidDst().split(",").length==2){
                     leoTid = leoleo.getTidDst();
                 }
-                if(!leoleo.getToken().equals("")){
+                if(!leoleo.getToken().equals("")&&leoleo.getToken().split(",").length==4){
                     leoToken = leoleo.getToken();
                 }
                 System.out.println("leoTid"+leoTid);

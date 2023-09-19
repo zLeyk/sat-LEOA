@@ -543,7 +543,7 @@ public class LeoLeoAuthTask implements Runnable {
                 //当前时间
                 Long ct = System.currentTimeMillis();
                 //(ct-t)<2000 &&
-                if (leoleo.getToken() != null) {
+                if (leoleo.getToken() != null&&!leoleo.getToken().equals("")) {
                     if (TID_Dst.equals(leoleo.getTidDst()) && Token.equals(leoleo.getToken())) {
                         String newmsg_Src = leoleo.getTidSrc();
                         System.out.println("LEO-B校验数据");
@@ -642,6 +642,12 @@ public class LeoLeoAuthTask implements Runnable {
                     } else {
                         log += "临时身份或Token校验不通过\n";
                         log += "认证失败\n";
+                        try {
+                            writer.write("临时身份或Token校验不通过");
+                            writer.write("eof\n");
+                            writer.flush();
+                        } catch (Exception e) {
+                        }
                         // iptablesManager.DacceptIcmp(clientIP);//封禁ip
                         try {
                             sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
@@ -661,6 +667,12 @@ public class LeoLeoAuthTask implements Runnable {
                 } else {
                     log += "Token为空！\n";
                     log += "认证失败\n";
+                    try {
+                        writer.write("Token为空");
+                        writer.write("eof\n");
+                        writer.flush();
+                    } catch (Exception e) {
+                    }
                     //   iptablesManager.DacceptIcmp(clientIP);//封禁ip
                     try {
                         sql = "delete from leoleo where IDsat='"+DstIDsat+"'";
@@ -672,7 +684,6 @@ public class LeoLeoAuthTask implements Runnable {
                         pst.setString(3, log);
                         pst.executeUpdate();
                         pst.close();
-
                     } catch (SQLException ee) {
                         ee.printStackTrace();
                     }
